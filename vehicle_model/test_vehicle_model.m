@@ -1,7 +1,7 @@
 %% test_vehicle_model.m
 % Script contains variable declarations and loads data necessary to execute
 % the test vehicle Simulink model (test_vehicle_model.slx)
-%
+
 % Developed by: SloNav (John Barry, Zach Eagan, Ryan Mackintosh)
 % Date Created: Jan. 19, 2017
 % License: MIT
