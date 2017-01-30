@@ -33,6 +33,13 @@ I = 1;      % Integral gain
 D = 1;      % Derivative gain
 N = 100;    % Filter coefficent
 
+%% Vehicle dynamics variable declarations
+
+% Geometry
+B = 5   % Track width [ft]
+L = 7   % Length between axles [ft]
+
+
 %% Runs Simulink model
 % Executes the test_vehicle_model.slx
 
