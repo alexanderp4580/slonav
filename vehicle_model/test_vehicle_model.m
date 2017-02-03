@@ -36,8 +36,17 @@ N = 100;    % Filter coefficent
 %% Vehicle dynamics variable declarations
 
 % Geometry
-B = 5   % Track width [ft]
-L = 7   % Length between axles [ft]
+B = 5;      % Track width [ft]
+L = 7;      % Length between axles [ft]
+a = L/2;    % Distance from center of gravity to solid axle [ft]
+b = L/2;    % Distance from center of gravity to motors [ft]
+m = 150;    % Mass of vehicle [lb]
+I = 217852; % Moment of inertia of vehicle [lb*in^2]
+
+% Tire properties
+Re = 4/12;    % Effective radius [ft]
+Kx = 0.5;     % Longitudial slip stiffness
+Ka = 0.5;     % Cornering stiffness
 
 
 %% Runs Simulink model
