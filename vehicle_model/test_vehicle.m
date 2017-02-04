@@ -11,35 +11,42 @@ clear all
 close all
 clc
 
+%% Controller
+% PID Controller coefficients for steering system
+
+P = 10;
+I = 0;
+D = 0;
+N = 100;
+
 %% Inputs
-m1 = 5;         % Motor 1 input
-m2 = 2;         % Motor 2 input
-brake = 0;      % Brake percentage
+% Variables that define the initial conditions and length of simulation
+
 m1_ic = 0.01;   % Inital motor 1 speed [rpm]
 m2_ic = 0.01;   % Initial motor 2 speed [rpm]
 t_start = 0;    % Simulation start time
 t_stop = 10;    % Simulation stop time
 
-%% Motor controller variable declarations
+%% Motor variable declarations
 % Variables are used for both motors
 
 % Motor variables
 k_motor = 167;          % [RPM/V]
-t_motor = 1;            % [1/sec]
-gear_ratio = 1;         % [RPM/RPM]
+t_motor = 0.5;          % [1/sec]
+gear_ratio = 1/4.1;     % [RPM/RPM]
 
 %% Vehicle dynamics variable declarations
 % Geometry
-B = 5;      % Track width [ft]
-L = 7;      % Length between axles [ft]
-a = L/2;    % Distance from center of gravity to solid axle [ft]
-b = L/2;    % Distance from center of gravity to motors [ft]
-m = 150;    % Mass of vehicle [lb]
-I = 217852/(12^2); % Moment of inertia of vehicle [lb*ft^2]
+B = 5;             % Track width [ft]
+L = 7;             % Length between axles [ft]
+a = 4;             % Distance from center of gravity to solid axle [ft]
+b = L - a;         % Distance from center of gravity to motors [ft]
+m = 150;           % Mass of vehicle [lb]
+I = 210000/(12^2); % Moment of inertia of vehicle [lb*ft^2]
 
 % Tire properties
 R = 4/12;   % Effective radius [ft]
-Kx = 1;   % Longitudial slip stiffness
+Kx = 1;     % Longitudial slip stiffness
 Ka = 0.5;   % Cornering stiffness
 
 
@@ -51,4 +58,12 @@ figure(1);
 plot(pos(:,1),pos(:,2));
 xlabel('X Position');
 ylabel('Y Position');
-
+ylim([-1 1]);
+figure(2);
+plot(tout,vel(:,1));
+xlabel('Time');
+ylabel('X Velocity');
+figure(3);
+plot(tout,vel(:,2));
+xlabel('Time');
+ylabel('Y Velocity');
