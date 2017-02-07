@@ -14,19 +14,20 @@ clc
 %% Controllers
 
 % Setpoints and disturbances
-input = [5000 50];  % Setpoint [Position[ft] Velocity[ft/s]]
-disturb_time = 5;   % 
-disturb_val = 20;   %
-speed_sp = 30;      % 
+input = [500, 50];     % Waypoint [Position[ft], Velocity[ft/s]]
+look_ahead = 0.25;      % Look ahead carrot point [ft]
+disturb_time = 5;       % Time of disturbance [sec]
+disturb_val = 0;       % Intensity of disturbance [lb]
+speed_sp = 30;          % 2 * Speed of motors [%FS] 
 
 % PID Controller coefficients for steering system
-steer_P = 10;
+steer_P = 5;
 steer_I = 0;
 steer_D = 0.1;
-steer_N = 1000;
+steer_N = 100;
 
 % PID Controller coefficients for speed system
-speed_P = 100;
+speed_P = 0.1;
 speed_I = 0;
 speed_D = 0;
 speed_N = 100;
@@ -36,7 +37,7 @@ speed_N = 100;
 
 u_start = 0.01;   % Starting speed of the vehicle
 t_start = 0;      % Simulation start time
-t_stop = 100;      % Simulation stop time
+t_stop = 1000;      % Simulation stop time
 
 %% Motor variable declarations
 % Variables are used for both motors
