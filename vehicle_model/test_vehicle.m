@@ -14,18 +14,19 @@ clc
 %% Controllers
 
 % Setpoints and disturbances
-look_ahead = 0.25;     % Look ahead carrot point [ft]
+look_ahead = 1;        % Look ahead carrot point [ft]
 disturb_time = 5;      % Time of disturbance [sec]
 disturb_val = 30;      % Intensity of disturbance [lb]
-speed_sp = 30;         % 2 * Speed of motors [%FS] 
+speed_sp = 30;         % 2 * Speed of motors [%FS]
+input = [1000, 50];    
 
 % PID Controller coefficients for steering system
-steer_P = 5;
-steer_I = 0;
-steer_D = 0.1;
+steer_P = 1;
+steer_I = 0.15;
+steer_D = 0.2;
 steer_N = 100;
 
-% PID Controller coefficients for speed system
+% PID Controller coefficients for steering system
 speed_P = 1;
 speed_I = 0;
 speed_D = 0;
@@ -34,9 +35,9 @@ speed_N = 100;
 %% Inputs
 % Variables that define the initial conditions and length of simulation
 
-u_start = 0.01;   % Starting speed of the vehicle
-t_start = 0;      % Simulation start time
-t_stop = 30;      % Simulation stop time
+u_start = 0.01;   % Starting speed of the vehicle [ft/s]
+t_start = 0;      % Simulation start time [s]
+t_stop = 70;      % Simulation stop time [s]
 
 %% Motor variable declarations
 % Variables are used for both motors
@@ -56,9 +57,9 @@ m = 300/32.2;      % Mass of vehicle [lb]
 I = 210000/(12^2); % Moment of inertia of vehicle [lb*ft^2]
 
 % Tire properties
-R = 4/12;                  % Effective radius [ft]
-Kx = m*.15*180/(2*pi);     % Longitudial slip stiffness [lb/rad]
-Ka = m*.15*180/(2*pi);     % Cornering stiffness [lb/rad]
+R = 4/12;          % Effective radius [ft]
+Kx = 2150;         % Longitudial slip stiffness [lb/rad]
+Ka = 2150;         % Cornering stiffness [lb/rad]
 
 %% Runs Simulink model
 % Executes the test_vehicle_model.slx
