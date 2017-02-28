@@ -1,185 +1,269 @@
-//************************************************************************************************************
-/** @file imu_drv.cpp
- *    This file contains the driver for the 9 DOF IMU breakout board (BNO055). Most of the code used was
- *    copied and modifed from the Adafruit BNO055 driver files
- *    (https://github.com/adafruit/Adafruit_BNO055/blob/master/Adafruit_BNO055.cpp).
- *
- *  Revisions:
- *    @li 05-14-2016 ME405 Group 3 original file
- *
- */
-//************************************************************************************************************
+/*  @file imu.cpp
+*
+* This file contains the driver for the 9 DOF IMU breakout board (BNO055). 
+*
+*/
+//------------------------------------------------------------------------------
 
-#include <stdlib.h>                       // Include standard library header files
+#include "imu.h"          // Include header for the imu class
 
-// TODO: Replace with mbed stuff
-// #include <avr/io.h>
-// #include "rs232int.h"                     // Include header for serial port class
+//------------------------------------------------------------------------------
 
-#include "imu_drv.h"                      // Include header for the motor class
-
-//------------------------------------------------------------------------------------------------------------
-/** \brief This constructor sets up the 9 DOF IMU object.
- *  \details The constructor creates a p_serial object for printing to the serial port and creates a i2c_comm
- *           object which allows for communication between the sensor and ME 405 board. The constructor also
- *           checks that the i2c_comm object can communicate with the IMU and verifies the address of the IMU.
- *           Lastly the constructor sets the default settings of the imu which are nDOF mode, metric units,
- *           and normal power mode.
- *  @param p_serial_port A pointer to the serial port which writes debugging info.
- */
-
-imu_drv::imu_drv(emstream* p_serial_port)
+IMU::IMU(PinName sda, PinName scl, uint8_t chip_addr, PinName tx, PinName rx, bool verbose = false): _i2c(sda, scl), _ser(tx, rx)
 {
-    // Declares ptr_to_serial variable which is used for printing to serial port
-    p_serial = p_serial_port;
-    
-    // Creates an I2C communication object
-    i2c_master* i2c_temp = new i2c_master(p_serial);
-    i2c_comm = i2c_temp;
-  
+    _verbose = verbose;
+    addr = chip_addr;
+    _i2c.frequency(400000);
+
     // Make sure we have the right device (chip ID is 0xA0)
-    uint8_t id = i2c_comm->read(IMU_ADDRESS, BNO055_CHIP_ID_ADDR);
+    uint8_t id;
+    _i2c.write(addr, BNO055_CHIP_ID_ADDR, 1, true);
+    _i2c.read(addr, id, 1);
     if(id != BNO055_ID)
     {
-      *p_serial << PMS ("IMU object intial communication error") << endl;
+        if(_verbose == true)
+        {
+            _ser.printf("Error: IMU initial communication failed\n");
+        }
     }
-    else
-    {
-      *p_serial << PMS ("IMU object intial communication sucess") << endl;
-    }
-    
+
     setOpMode(OPERATION_MODE_CONFIG);
     setPwrMode(POWER_MODE_NORMAL);
     setUnits();
     setOpMode(OPERATION_MODE_NDOF);
+}
+
+//------------------------------------------------------------------------------
+
+void IMU::setOpMode(uint8_t mode)
+{
+    uint8_t data[2] = [BNO055_OPR_MODE_ADDR, mode];
+    _i2c.write(addr, data, 2);
+    if(_verbose == true)
+    {
+        _ser.printf("IMU operation mode set\n");
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void IMU::setPwrMode(uint8_t mode)
+{
+
+    uint8_t data[2] = [BNO055_PWR_MODE_ADDR, mode];
+    _i2c.write(addr, data, 2);
+    if(_verbose == true)
+    {
+        _ser.printf("IMU operation mode set\n");
+    }
+    *p_serial << PMS("IMU power mode set") << endl;
 
 }
 
+//------------------------------------------------------------------------------
 
-/// Setter Methods
-//------------------------------------------------------------------------------------------------------------
-/** \brief Sets operation mode of IMU
- *  \details Changes the operation mode to one of the operation mode values defineed in the header file and 
- *           prints a confirmation message.
- *  @param mode Variable of imu_opmode type as defined in the header file.
- */
-void imu_drv::setOpMode(imu_opmode_t mode)
+void IMU::setUnits(void)
 {
-  i2c_comm->write(IMU_ADDRESS, BNO055_OPR_MODE_ADDR, mode);
-  *p_serial << PMS ("IMU operation mode set") << endl;
+
+    uint8_t unitsel = (0 << 7) | // Orientation = Android
+                      (0 << 4) | // Temperature = Celsius
+                      (0 << 2) | // Euler = Degrees
+                      (0 << 1) | // Gyro = Degrees
+                      (0 << 0);  // Accelerometer = m/s^2
+    uint8_t data[2] = [BNO055_UNIT_SEL_ADDR , unitsel];
+    _i2c.write(addr, data, 2);
+    if(_verbose == false)
+    {
+        _ser.printf("IMU units set\n");
+    }
+
 }
 
-//------------------------------------------------------------------------------------------------------------
-/** \brief Sets power mode of IMU
- *  \details Changes the power mode to one of the operation mode values defineed in the header file and prints
- *           a confirmation message.
- *  @param mode Variable of imu_powermode type as defined in the header file.
- */
-void imu_drv::setPwrMode(imu_powermode_t mode)
+//------------------------------------------------------------------------------
+
+void IMU::setMountingPosition(uint8_t pos)
 {
-  i2c_comm->write(IMU_ADDRESS, BNO055_PWR_MODE_ADDR, mode);
-  *p_serial << PMS ("IMU power mode set") << endl;
+    uint8_t remapConfig;
+    uint8_t remapSign;
+    uint8_t currentMode;
+    uint8_t data[3];
+
+    currentMode = getOpMode();
+    setOpMode(OPERATION_MODE_CONFIG);
+    switch (pos) 
+    {
+        case 0:
+            remap_config = 0x21;
+            remapSign = 0x04;
+            break;
+        case 2:
+            remap_config = 0x24;
+            remapSign = 0x06;
+            break;
+        case 3:
+            remap_config = 0x21;
+            remapSign = 0x02;
+            break;
+        case 4:
+            remap_config = 0x24;
+            remapSign = 0x03;
+            break;
+        case 5:
+            remap_config = 0x21;
+            remapSign = 0x01;
+            break;
+        case 6:
+            remap_config = 0x21;
+            remapSign = 0x07;
+            break;
+        case 7:
+            remap_config = 0x24;
+            remapSign = 0x05;
+            break;
+        case 1:
+        default:
+            remap_config = 0x24;
+            remapSign = 0x00;
+            break;
+    }
+
+    data[0] = BNO055_AXIS_MAP_CONFIG_ADDR;
+    data[1] = remap_config;
+    data[2] = remapSign;
+    _i2c.write(addr, data, 3);
+    setOpMode(currentMode);
 }
 
-//------------------------------------------------------------------------------------------------------------
-/** \brief Sets units selection mode of IMU
- *  \details Sets the units for the acceleration, linear acceleration, and gravity vector to m/s^2. Sets the 
-	     units for the angular rate to deg/sec. Sets the units for the Euler Angles to degrees and the 
-	     units for the temperature to degC.
- *  @param none
- */
-void imu_drv::setUnits()
-{
-  uint8_t unitsel = (0 << 7) | // Orientation = Android
-                    (0 << 4) | // Temperature = Celsius
-                    (0 << 2) | // Euler = Degrees
-                    (0 << 1) | // Gyro = Degrees
-                    (0 << 0);  // Accelerometer = m/s^2
-  i2c_comm->write(IMU_ADDRESS, BNO055_UNIT_SEL_ADDR , unitsel);
-  *p_serial << PMS ("IMU units set") << endl;
-}
+//------------------------------------------------------------------------------
 
-/// Getter methods
-//------------------------------------------------------------------------------------------------------------
-/** \brief Reads system status register of the IMU
- *  \details Prints out the system status of the IMU (numbers correspond to values listed in comments). If an
- *           error status is determined then the error message is also printed (numbers correspond to values
- *           listed in commments).
- *  @param none
- */
-
-void imu_drv::getSysStatus()
+void IMU::getSysStatus(void)
 {
-  // Reads the system status register and saves it.
-  /* System Status
-     ---------------------------------
-     0 = Idle
-     1 = System Error
-     2 = Initializing Peripherals
-     3 = System Iniitalization
-     4 = Executing Self-Test
-     5 = Sensor fusion algorithm running
-     6 = System running without fusion algorithms 
-  */
-  uint8_t sys_status = i2c_comm->read(IMU_ADDRESS, BNO055_SYS_STAT_ADDR);
+    uint8_t sys_status;
+    uint8_t test_status;
+
+    // Reads the system status register and saves it.
+    /* System Status
+      ---------------------------------
+      0 = Idle
+      1 = System Error
+      2 = Initializing Peripherals
+      3 = System Iniitalization
+      4 = Executing Self-Test
+      5 = Sensor fusion algorithm running
+      6 = System running without fusion algorithms 
+    */
+    _i2c.write(addr, BNO055_SYS_STAT_ADDR, 1, true);
+    _i2c.read(addr, sys_status, 1);
   
-  // Reads the system self test register and saves it.
-  /* Self Test Results
-     --------------------------------
-     1 = test passed, 0 = test failed
-     0 = Accelerometer self test
-     1 = Magnetometer self test
-     2 = Gyroscope self test
-     4 = MCU self test
-     15 = all good! 
-  */
-  uint8_t test_status = i2c_comm->read(IMU_ADDRESS, BNO055_SELFTEST_RESULT_ADDR);
+    // Reads the system self test register and saves it.
+    /* Self Test Results
+      --------------------------------
+      1 = test passed, 0 = test failed
+      0 = Accelerometer self test
+      1 = Magnetometer self test
+      2 = Gyroscope self test
+      4 = MCU self test
+      15 = all good! 
+    */
+    _i2c.write(addr, BNO055_SELFTEST_RESULT_ADDR, 1, true);
+    _i2c.read(addr, test_status, 1);
  
-  // Prints out the system status register contents
-  *p_serial << PMS ("IMU system status: ") << sys_status << endl;
-  
-  // If there is an error state then print out the error code
-  if(sys_status == 1)
-  {
-     *p_serial << PMS ("Error Code: ") << i2c_comm->read(IMU_ADDRESS, BNO055_SYS_ERR_ADDR) << endl;
-  }
-  
-  // Prints out the system self test register contents
-  *p_serial << PMS ("IMU system self test status: ") << test_status << endl << endl;
-  
+    // Prints out the system status register contents
+    if(_verbose == true)
+    {
+        _ser.printf("IMU system status: %d\n", sys_status);
+    }
+    
+    // If there is an error state then print out the error code
+    if(sys_status == 1)
+    {
+        _i2c.write(addr, BNO055_SYS_ERR_ADDR, 1);
+        if(_verbose == true)
+        {
+            _ser.printf("Error Code: %d\n", i2c.read(addr));
+        }
+    }
+    
+    // Prints out the system self test register contents
+    if(_verbose == true)
+    {
+        _ser.printf("IMU system self test status: %d\n\n", test_status);
+    }
+
 }
 
-//------------------------------------------------------------------------------------------------------------
-/** \brief Reads Euler angle registers and returns selected value.
- *  \details This method returns the Euler angle value desired based on the data select input. An input of 1
- *           returns the heading value, an input of 2 returns the roll value, and an input of 3 returns the
- *           pitch value. The values read are 16x the value in degrees.
- *  @param data_sel Variable used to pick which Euler angle value (heading, roll, or pitch) is desired. 
- */
+//------------------------------------------------------------------------------
 
-int16_t imu_drv::getEulerAng(uint8_t data_sel)
+uint8_t IMU::getOpMode(void)
 {
-  if(data_sel == 1)
-  {
-    int16_t heading = ((((i2c_comm->read(IMU_ADDRESS, BNO055_EULER_H_MSB_ADDR)) << 8) | 
-		         (i2c_comm->read(IMU_ADDRESS, BNO055_EULER_H_LSB_ADDR))));
-    return heading;
-  }
-  else if(data_sel == 2)
-  {
-    int16_t roll    = ((((i2c_comm->read(IMU_ADDRESS, BNO055_EULER_R_MSB_ADDR)) << 8) | 
-		         (i2c_comm->read(IMU_ADDRESS, BNO055_EULER_R_LSB_ADDR))));
-    return roll;
-  }
-  else if(data_sel == 3)
-  {
-    int16_t pitch   = ((((i2c_comm->read(IMU_ADDRESS, BNO055_EULER_P_MSB_ADDR)) << 8) | 
-		         (i2c_comm->read(IMU_ADDRESS, BNO055_EULER_P_LSB_ADDR))));
-    return pitch;
-  }
-  else
-  {
-    *p_serial << PMS("Error in getEulerAng") << endl;
-    return 0;
-  }
+
+    uint8_t mode;
+
+    _i2c.write(addr, BNO055_OPR_MODE_ADDR, 1, true);
+    _i2c.read(addr, mode, 1);
+    return mode;
+
+}
+
+//------------------------------------------------------------------------------
+
+void IMU::getEulerAng(imu_euler_t *e)
+{
+
+    uint8_t data[6];
+    int16_t h, p, r;
+
+    _i2c.write(addr, BNO055_EULER_H_LSB_ADDR, 1, true);
+    _i2c.read(addr, data, 6);
+
+    h = data[1] << 8 | data[0];
+    p = data[3] << 8 | data[2];
+    r = data[5] << 8 | data[4];
+
+    e->heading = (float)h / 16;
+    e->pitch = (float)p / 16;
+    e->roll = (float)r / 16;
+
+}
+
+//------------------------------------------------------------------------------
+
+void IMU::getLinAccel(imu_lin_accel_t *la)
+{
+
+    uint8_t data[6];
+    int16_t x, y, z;
+
+    _i2c.write(addr, BNO055_LINEAR_ACCEL_DATA_X_LSB_ADDR, 1, true);
+    _i2c.read(addr, data, 6);
+
+    x = data[1] << 8 | data[0];
+    y = data[3] << 8 | data[2];
+    z = data[5] << 8 | data[4];
+
+    la->x = (float)x;
+    la->y = (float)y;
+    la->z = (float)z;
+
+}
+
+//------------------------------------------------------------------------------
+
+void IMU::getGravity(imu_gravity_t *g)
+{
+
+    uint8_t data[6];
+    int16_t x, y, z;
+
+    _i2c.write(addr, BNO055_GRAVITY_DATA_X_LSB_ADDR, 1, true);
+    _i2c.read(addr, data, 6);
+
+    x = data[1] << 8 | data[0];
+    y = data[3] << 8 | data[2];
+    z = data[5] << 8 | data[4];
+
+    g->x = (float)x;
+    g->y = (float)y;
+    g->z = (float)z;
+
 }
