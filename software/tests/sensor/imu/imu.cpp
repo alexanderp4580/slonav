@@ -9,14 +9,14 @@
 
 //------------------------------------------------------------------------------
 
-IMU::IMU(PinName sda, PinName scl, uint8_t chip_addr, PinName tx, PinName rx, bool verbose = false): _i2c(sda, scl), _ser(tx, rx)
+IMU::IMU(PinName sda, PinName scl, char chip_addr, PinName tx, PinName rx, bool verbose = false): _i2c(sda, scl), _ser(tx, rx)
 {
     _verbose = verbose;
     addr = chip_addr;
     _i2c.frequency(400000);
 
     // Make sure we have the right device (chip ID is 0xA0)
-    uint8_t id;
+    char id;
     _i2c.write(addr, BNO055_CHIP_ID_ADDR, 1, true);
     _i2c.read(addr, id, 1);
     if(id != BNO055_ID)
@@ -35,9 +35,9 @@ IMU::IMU(PinName sda, PinName scl, uint8_t chip_addr, PinName tx, PinName rx, bo
 
 //------------------------------------------------------------------------------
 
-void IMU::setOpMode(uint8_t mode)
+void IMU::setOpMode(char mode)
 {
-    uint8_t data[2] = [BNO055_OPR_MODE_ADDR, mode];
+    char data[2] = [BNO055_OPR_MODE_ADDR, mode];
     _i2c.write(addr, data, 2);
     if(_verbose == true)
     {
@@ -47,16 +47,15 @@ void IMU::setOpMode(uint8_t mode)
 
 //------------------------------------------------------------------------------
 
-void IMU::setPwrMode(uint8_t mode)
+void IMU::setPwrMode(char mode)
 {
 
-    uint8_t data[2] = [BNO055_PWR_MODE_ADDR, mode];
+    char data[2] = [BNO055_PWR_MODE_ADDR, mode];
     _i2c.write(addr, data, 2);
     if(_verbose == true)
     {
-        _ser.printf("IMU operation mode set\n");
+        _ser.printf("IMU power mode set\n");
     }
-    *p_serial << PMS("IMU power mode set") << endl;
 
 }
 
@@ -65,12 +64,12 @@ void IMU::setPwrMode(uint8_t mode)
 void IMU::setUnits(void)
 {
 
-    uint8_t unitsel = (0 << 7) | // Orientation = Android
+    char unitsel = (0 << 7) | // Orientation = Android
                       (0 << 4) | // Temperature = Celsius
                       (0 << 2) | // Euler = Degrees
                       (0 << 1) | // Gyro = Degrees
                       (0 << 0);  // Accelerometer = m/s^2
-    uint8_t data[2] = [BNO055_UNIT_SEL_ADDR , unitsel];
+    char data[2] = [BNO055_UNIT_SEL_ADDR , unitsel];
     _i2c.write(addr, data, 2);
     if(_verbose == false)
     {
@@ -83,10 +82,10 @@ void IMU::setUnits(void)
 
 void IMU::setMountingPosition(uint8_t pos)
 {
-    uint8_t remapConfig;
-    uint8_t remapSign;
-    uint8_t currentMode;
-    uint8_t data[3];
+    char remapConfig;
+    char remapSign;
+    char currentMode;
+    char data[3];
 
     currentMode = getOpMode();
     setOpMode(OPERATION_MODE_CONFIG);
@@ -138,8 +137,8 @@ void IMU::setMountingPosition(uint8_t pos)
 
 void IMU::getSysStatus(void)
 {
-    uint8_t sys_status;
-    uint8_t test_status;
+    char sys_status;
+    char test_status;
 
     // Reads the system status register and saves it.
     /* System Status
@@ -194,10 +193,10 @@ void IMU::getSysStatus(void)
 
 //------------------------------------------------------------------------------
 
-uint8_t IMU::getOpMode(void)
+char IMU::getOpMode(void)
 {
 
-    uint8_t mode;
+    char mode;
 
     _i2c.write(addr, BNO055_OPR_MODE_ADDR, 1, true);
     _i2c.read(addr, mode, 1);
@@ -210,7 +209,7 @@ uint8_t IMU::getOpMode(void)
 void IMU::getEulerAng(imu_euler_t *e)
 {
 
-    uint8_t data[6];
+    char data[6];
     int16_t h, p, r;
 
     _i2c.write(addr, BNO055_EULER_H_LSB_ADDR, 1, true);
@@ -231,7 +230,7 @@ void IMU::getEulerAng(imu_euler_t *e)
 void IMU::getLinAccel(imu_lin_accel_t *la)
 {
 
-    uint8_t data[6];
+    char data[6];
     int16_t x, y, z;
 
     _i2c.write(addr, BNO055_LINEAR_ACCEL_DATA_X_LSB_ADDR, 1, true);
@@ -252,7 +251,7 @@ void IMU::getLinAccel(imu_lin_accel_t *la)
 void IMU::getGravity(imu_gravity_t *g)
 {
 
-    uint8_t data[6];
+    char data[6];
     int16_t x, y, z;
 
     _i2c.write(addr, BNO055_GRAVITY_DATA_X_LSB_ADDR, 1, true);
