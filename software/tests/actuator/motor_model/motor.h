@@ -18,24 +18,55 @@
 *
 */
 
-class MOTOR_H
+class MOTOR
 {
 
 private:
-
-protected:
+    PwmOut _forward;
+    PwmOut _backward;
+    DigitalOut _enable;
+    Serial _ser;
+    bool _verbose;
+    uint8_t _motorNum;
 
 public:
 
     //--------------------------------------------------------------------------
     /** TODO
     *
-    *   TOOD
+    *   TODO
     *
     */
 
-    MOTOR()
+    MOTOR(uint8_t motorNum, PinName forward, PinName backward, PinName enable, bool verbose = false, PinName tx = USBTX, PinName rx = USBRX);
 
-}
+    //--------------------------------------------------------------------------
+    /** TODO
+    *
+    *   TODO
+    *
+    */
+
+    void setOutput(int8_t percent);
+
+    //--------------------------------------------------------------------------
+    /** TODO
+    *
+    *   TODO
+    *
+    */
+
+    void stop();
+
+    //--------------------------------------------------------------------------
+    /** TODO
+    *
+    *   TODO
+    *
+    */
+
+    void start(int8_t percent);
+
+}; // end of class motor
 
 #endif

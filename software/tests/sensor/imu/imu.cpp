@@ -9,10 +9,8 @@
 
 //------------------------------------------------------------------------------
 
-IMU::IMU(PinName sda, PinName scl, char chip_addr, PinName tx, PinName rx, bool verbose): _i2c(sda, scl), _ser(tx, rx)
+IMU::IMU(PinName sda, PinName scl, char chip_addr,  bool verbose, PinName tx, PinName rx): _i2c(sda, scl), _ser(tx, rx), _verbose(verbose), addr(chip_addr)
 {
-    _verbose = verbose;
-    addr = chip_addr;
     _i2c.frequency(40000);
 
     char reg[1] = {BNO055_CHIP_ID_ADDR};

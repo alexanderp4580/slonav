@@ -3,7 +3,7 @@
  
 int main()
 {
-    IMU imu(I2C_SDA, I2C_SCL, BNO055_G_CHIP_ADDR, USBTX, USBRX, true);
+    IMU imu(I2C_SDA, I2C_SCL, BNO055_G_CHIP_ADDR, true);
     Serial ser(USBTX, USBRX);
 
     while(1)

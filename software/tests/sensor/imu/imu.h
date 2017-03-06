@@ -68,7 +68,7 @@ public:
     *   @param TODO
     */
 
-    IMU(PinName sda, PinName scl, char chip_addr, PinName tx, PinName rx, bool verbose = false);
+    IMU(PinName sda, PinName scl, char chip_addr,  bool verbose = false, PinName tx = USBTX, PinName rx = USBRX);
     
     //--------------------------------------------------------------------------
     /** Sets operation mode of IMU
