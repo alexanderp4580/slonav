@@ -48,6 +48,7 @@ PROJECT := slonav
 
 OBJECTS += main.o
 OBJECTS += motor.o
+OBJECTS += QEI.o
 OBJECTS += mbed-dev/drivers/AnalogIn.o
 OBJECTS += mbed-dev/drivers/BusIn.o
 OBJECTS += mbed-dev/drivers/BusInOut.o
