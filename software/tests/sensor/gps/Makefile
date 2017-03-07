@@ -47,6 +47,7 @@ PROJECT := slonav
 # Objects and Paths
 
 OBJECTS += main.o
+OBJECTS += GPS.o
 OBJECTS += mbed-dev/drivers/AnalogIn.o
 OBJECTS += mbed-dev/drivers/BusIn.o
 OBJECTS += mbed-dev/drivers/BusInOut.o
