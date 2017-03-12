@@ -47,6 +47,11 @@ PROJECT := slonav
 # Objects and Paths
 
 OBJECTS += main.o
+OBJECTS += gps/gps.o
+OBJECTS += imu/imu.o
+OBJECTS += TinyEKF/TinyEKF.o
+OBJECTS += TinyEKF/tiny_ekf.o
+OBJECTS += TinyEKF/tiny_ekf_struct.o
 OBJECTS += mbed-dev/drivers/AnalogIn.o
 OBJECTS += mbed-dev/drivers/BusIn.o
 OBJECTS += mbed-dev/drivers/BusInOut.o
@@ -189,6 +194,9 @@ OBJECTS += mbed-dev/targets/TARGET_STM/us_ticker_32b.o
 
 INCLUDE_PATHS += -I../
 INCLUDE_PATHS += -I../.
+INCLUDE_PATHS += -I../gps
+INCLUDE_PATHS += -I../imu
+INCLUDE_PATHS += -I../TinyEKF
 INCLUDE_PATHS += -I../mbed-dev
 INCLUDE_PATHS += -I../mbed-dev/cmsis
 INCLUDE_PATHS += -I../mbed-dev/cmsis/TOOLCHAIN_GCC
