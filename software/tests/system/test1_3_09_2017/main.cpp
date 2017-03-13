@@ -42,6 +42,8 @@ int main()
    IMU::imu_lin_accel_t linAccel;
    IMU::imu_euler_t euler;
 
+  
+
    while (1) 
    {
       Pc.printf("start\r\n");
