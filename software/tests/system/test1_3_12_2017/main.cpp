@@ -46,6 +46,9 @@ PwmIn E_Stop(ESTO);
 void setMot() {
    float throt;
    float lr; 
+
+   float left;
+   float right;
 	
    Pc.printf("B\r\n");
 
@@ -57,14 +60,17 @@ void setMot() {
    throt /= 8;
 
    lr *= 1000000;
-   lr -= 1500;
-   lr /= 400;
+   lr -= 1000;
+   lr /= 1000;
 
-   Pc.printf("Left: %d\r\n",(int)(lr * throt));
-   Pc.printf("Right: %d\r\n",(int)((1 - lr) * throt));
+   left = (1 - lr) * throt;
+   right = lr * throt;
 
-   MotorL.setOutput((int)(lr * throt));
-   MotorR.setOutput((int)((1 - lr)*throt));
+   Pc.printf("Left: %d\r\n",(int)left);
+   Pc.printf("Right: %d\r\n",(int)right);
+
+   MotorL.setOutput((int)left);
+   MotorR.setOutput((int)right);
 }
 
 
