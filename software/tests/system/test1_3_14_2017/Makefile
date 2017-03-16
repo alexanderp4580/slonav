@@ -52,6 +52,7 @@ OBJECTS += gps/gps.o
 OBJECTS += imu/imu.o
 OBJECTS += motor_model/QEI.o
 OBJECTS += motor_model/motor.o
+OBJECTS += motor_model/PID.o
 #OBJECTS += fusion/fusion.o
 
 OBJECTS += mbed-dev/drivers/AnalogIn.o
