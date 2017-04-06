@@ -48,6 +48,12 @@ PROJECT := slonav
 OBJECTS += main.o
 OBJECTS += SDFileSystem/SDFileSystem.o
 OBJECTS += SDFileSystem/SDCRC.o
+OBJECTS += SDFileSystem/FATFileSystem/FATDirHandle.o
+OBJECTS += SDFileSystem/FATFileSystem/FATFileHandle.o
+OBJECTS += SDFileSystem/FATFileSystem/FATFileSystem.o
+OBJECTS += SDFileSystem/FATFileSystem/ChaN/ccsbcs.o
+OBJECTS += SDFileSystem/FATFileSystem/ChaN/diskio.o
+OBJECTS += SDFileSystem/FATFileSystem/ChaN/ff.o
 
 OBJECTS += ../mbed/mbed-dev/drivers/AnalogIn.o
 OBJECTS += ../mbed/mbed-dev/drivers/BusIn.o
