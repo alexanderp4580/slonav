@@ -54,6 +54,7 @@ OBJECTS += SDFileSystem/FATFileSystem/FATFileSystem.o
 OBJECTS += SDFileSystem/FATFileSystem/ChaN/ccsbcs.o
 OBJECTS += SDFileSystem/FATFileSystem/ChaN/diskio.o
 OBJECTS += SDFileSystem/FATFileSystem/ChaN/ff.o
+OBJECTS += ../sensor/imu/imu.o
 
 OBJECTS += ../mbed/mbed-dev/drivers/AnalogIn.o
 OBJECTS += ../mbed/mbed-dev/drivers/BusIn.o
@@ -200,6 +201,7 @@ INCLUDE_PATHS += -I../.
 INCLUDE_PATHS += -I../SDFileSystem
 INCLUDE_PATHS += -I../SDFileSystem/FATFileSystem
 INCLUDE_PATHS += -I../SDFileSystem/FATFileSystem/ChaN
+INCLUDE_PATHS += -I../../sensor/imu
 INCLUDE_PATHS += -I../../mbed
 INCLUDE_PATHS += -I../../mbed/mbed-dev
 INCLUDE_PATHS += -I../../mbed/mbed-dev/cmsis

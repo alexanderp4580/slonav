@@ -38,8 +38,8 @@ const PinName ESTO = PA_9;
 const PinName CLK = PA_5;
 const PinName DO = PA_6;
 const PinName DI = PA_7;
-const PinName CS = PA_14;
-const PinName CD = PA_15;
+const PinName CS = PA_15;
+const PinName CD = PA_14;
 
 /* Brake */
 const PinName BRK = PC_0;
