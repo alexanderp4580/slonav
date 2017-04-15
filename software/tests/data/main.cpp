@@ -3,6 +3,8 @@
  * 4/5/2017
  *
 **/
+//#include <stdlib.h>
+//#include <stdio.h>
 
 #include "mbed.h"
 #include "pinout.h"
@@ -13,7 +15,7 @@
 #include "GPS.h"
 #include "QEI.h"
 #include "motor.h"
-
+#include "PwmIn.h"
 
 
 
@@ -39,12 +41,39 @@ typedef struct Map {
 } Map;
 
 int readMap(FILE *fp, Map *mp) {
+//    char *line;
+//    int len;
+
     if (!fp)
         return -1;
+   
+/*    while(line = getline(&line, &len, fp) != -1) {
+        printf("%s\r\n", line);
+    }
+*/
     return 0;
 }
 int checkMap(Map *mp) {
     return 0;
+}
+
+//Function allows driving by RC controler
+//Note: this is bad organisation for the final, the only function
+//  in the final program that can manipulate the motors directly
+//  should be main or a function only called from main who's only job
+//  is to set the motor speeds;
+int modeRC(float throtle, float lrat, int *mr, int *ml) {
+	throtle *= 1000000;
+	throtle -= 1100;
+	throtle /= 8;
+	
+	lrat *= 1000000;
+	lrat -= 1000;
+	lrat /= 1000;
+	*ml = (int)((1 - lrat) * throtle);
+	*mr = (int)(lrat * throtle);
+
+	return 0;
 }
 
 /* Test Objects */
@@ -68,13 +97,26 @@ IMU Imu(IMDA, IMCL, BNO055_G_CHIP_ADDR, true);
 /* GPS Objects */
 GPS Gps(GPTX, GPRX);
 
+/* Radio Objects */
+PwmIn Throt(THRO);
+PwmIn Lr(LRIN);
+PwmIn Mode(MODE);
+PwmIn E_Stop(ESTO);
+
+
 /* Input Buttons */
 DigitalIn Btn(PC_0);
 DigitalIn Dip(PB_6);
+
 int main()
 {
     Map mp;
     int pCount = 0;
+
+    //radio variables
+    float estop;
+    int mr, ml, md;
+
 
     // Creates variables of reading data types
     IMU::imu_euler_t euler;
@@ -120,18 +162,29 @@ int main()
     Pc.printf("Motors initialised\r\n");
 
     Pc.printf("Waiting on user GO\r\n");
-	while (!Dip) {
-    }
+	while ((estop = E_Stop.pulsewidth() * 1000000) < 1150 && 
+            estop > 1090)
+        ;
+	while ((estop = E_Stop.pulsewidth() * 1000000) != 1096)
+        ;
     
     Pc.printf("User GO accepted starting run\r\n");
-	while(Dip) {
+	while((estop = E_Stop.pulsewidth() * 1000000) < 1150 && 
+           estop > 1090) {
         fprintf(ofp, "Data Point: %d\r\n",pCount);
         //Check DIP2 to activate the motors
-		if(Btn) {
-			MotorL.start(125);
-			MotorR.start(125);
-            Pc.printf("Motor ON\r\n");
-			fprintf(ofp, "Motor ON\r\n");
+		if(Btn && (md = Mode.pulsewidth() * 1000000) > 1450 && 
+                   md < 1550) {
+			
+            
+			modeRC(Throt.pulsewidth(), Lr.pulsewidth(), &mr, &ml);
+			MotorL.start(ml);
+			MotorR.start(mr);
+            
+            Pc.printf("Motor ON\tMode:%f\t",Mode.pulsewidth() );
+            Pc.printf("Motor Left: %d\tMotor Right: %d\r\n", ml, mr);
+			fprintf(ofp, "Motor ON\t");
+            Pc.printf("Motor Left: %d\tMotor Right: %d\r\n", ml, mr);
 		} else {
 			MotorL.start(0);
 			MotorR.start(0);
@@ -172,6 +225,8 @@ int main()
         wait_ms(10);
     }
 
+    MotorL.start(0);
+    MotorR.start(0);
     //Unmount the filesystem
     fprintf(ofp,"End of Program\r\n");
     fclose(ofp);

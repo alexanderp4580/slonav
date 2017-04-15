@@ -58,6 +58,7 @@ OBJECTS += ../sensor/imu/imu.o
 OBJECTS += ../sensor/gps/GPS.o
 OBJECTS += ../actuator/motor_model/motor.o
 OBJECTS += ../actuator/motor_model/QEI.o
+OBJECTS += ../sensor/radio/PwmIn.o
 
 OBJECTS += ../mbed/mbed-dev/drivers/AnalogIn.o
 OBJECTS += ../mbed/mbed-dev/drivers/BusIn.o
@@ -206,6 +207,7 @@ INCLUDE_PATHS += -I../SDFileSystem/FATFileSystem
 INCLUDE_PATHS += -I../SDFileSystem/FATFileSystem/ChaN
 INCLUDE_PATHS += -I../../sensor/imu
 INCLUDE_PATHS += -I../../sensor/gps
+INCLUDE_PATHS += -I../../sensor/radio
 INCLUDE_PATHS += -I../../actuator/motor_model
 INCLUDE_PATHS += -I../../mbed
 INCLUDE_PATHS += -I../../mbed/mbed-dev
