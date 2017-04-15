@@ -21,8 +21,11 @@
 
 /* map structure */
 typedef struct Point {
+    int time;
     int x; //need to change to GPS relevent values
     int y;
+    int dir; //need to change to imu relevent values
+    int vel;
 } Point;
 
 typedef struct Map {
@@ -58,10 +61,6 @@ int checkMap(Map *mp) {
 }
 
 //Function allows driving by RC controler
-//Note: this is bad organisation for the final, the only function
-//  in the final program that can manipulate the motors directly
-//  should be main or a function only called from main who's only job
-//  is to set the motor speeds;
 int modeRC(float throtle, float lrat, int *mr, int *ml) {
 	throtle *= 1000000;
 	throtle -= 1100;
@@ -79,9 +78,11 @@ int modeRC(float throtle, float lrat, int *mr, int *ml) {
 /* Test Objects */
 Serial Pc(USBTX,USBRX);
 
+/* file system objects */
 SDFileSystem sd(DI, DO, CLK, CS, "sd");
-IMU imu(I2C_SDA, I2C_SCL, BNO055_G_CHIP_ADDR, true);
 
+/* IMU objects */
+IMU imu(I2C_SDA, I2C_SCL, BNO055_G_CHIP_ADDR, true);
 
 /* Motor Objects */
 MOTOR MotorR(1, IN2A, IN1A, ENA, true);
@@ -114,9 +115,16 @@ int main()
     int pCount = 0;
 
     //radio variables
-    float estop;
-    int mr, ml, md;
+    float throtle, leftright, mode, estop;
 
+    //motor variables
+    int mr, ml;
+
+    //encoder variables
+    int lenc, renc;
+
+    //gps variables
+    int lock;
 
     // Creates variables of reading data types
     IMU::imu_euler_t euler;
@@ -162,71 +170,91 @@ int main()
     Pc.printf("Motors initialised\r\n");
 
     Pc.printf("Waiting on user GO\r\n");
+    //estop must transition from low to high to activate vehical
 	while ((estop = E_Stop.pulsewidth() * 1000000) < 1150 && 
             estop > 1090)
         ;
 	while ((estop = E_Stop.pulsewidth() * 1000000) != 1096)
         ;
     
-    Pc.printf("User GO accepted starting run\r\n");
-	while((estop = E_Stop.pulsewidth() * 1000000) < 1150 && 
-           estop > 1090) {
-        fprintf(ofp, "Data Point: %d\r\n",pCount);
-        //Check DIP2 to activate the motors
-		if(Btn && (md = Mode.pulsewidth() * 1000000) > 1450 && 
-                   md < 1550) {
-			
-            
-			modeRC(Throt.pulsewidth(), Lr.pulsewidth(), &mr, &ml);
-			MotorL.start(ml);
-			MotorR.start(mr);
-            
-            Pc.printf("Motor ON\tMode:%f\t",Mode.pulsewidth() );
-            Pc.printf("Motor Left: %d\tMotor Right: %d\r\n", ml, mr);
-			fprintf(ofp, "Motor ON\t");
-            Pc.printf("Motor Left: %d\tMotor Right: %d\r\n", ml, mr);
-		} else {
-			MotorL.start(0);
-			MotorR.start(0);
-            Pc.printf("Motor OFF\r\n");
-			fprintf(ofp, "Motor OFF\r\n");
-		}
 
-        //Read data from GPS
-        if(Gps.parseData()) {
-            fprintf(ofp, "time: %f\r\n",Gps.time);
-            fprintf(ofp, "latatude: %f\r\n", Gps.latitude);
-            fprintf(ofp, "longitude: %f\r\n", Gps.longitude);
-            fprintf(ofp, "Satilites: %d\r\n", Gps.satellites);
-        } else {
-            fprintf(ofp, "GPS: No LOCK\r\n");
-        }
-            
-        //Read data from encoders
-        fprintf(ofp, "EncoderL: %d\r\n", EncoderL.getPulses());
-        fprintf(ofp, "EncoderR: %d\r\n", EncoderR.getPulses());
-        EncoderL.reset();
-        EncoderR.reset();
-    
+    //print collumn catagories
+    Pc.printf("User GO accepted starting run\r\n");
+    fprintf(ofp, "Point#, nearest waypoint, next waypoint, ");
+    fprintf(ofp, "rcThrot, rcDir, rcE-stop, rcMode, ");
+    fprintf(ofp, "time, lat, long, #sat, ");
+    fprintf(ofp, "xAcc, yAcc, zAcc, heading, pitch, role, xGra, yGra, zGra, ");
+    fprintf(ofp, "lEncoder, rEncoder, lMotor, rMotor\r\n");
+
+    //main loop, breaks out if estop tripped
+	while((estop = E_Stop.pulsewidth() * 1000000) < 1150 && estop > 1090) {
+
+        ////////////////////////////Gather Data
+        //get radio values
+        throtle = Throt.pulsewidth();
+        mode = Mode.pulsewidth();
+        leftright = Lr.pulsewidth();
         //Read data from IMU
         imu.getEulerAng(&euler);
         imu.getLinAccel(&linAccel);
         imu.getGravity(&grav);
+        //get encoder data and reset encoders
+        lenc = EncoderL.getPulses();
+        renc = EncoderR.getPulses();
+        EncoderL.reset();
+        EncoderR.reset();
+        //get gps data
+        lock = Gps.parseData();
 
-        fprintf(ofp, "Data Point %d\r\n", pCount);
-        fprintf(ofp, "Heading: %f Pitch: %f Roll: %f\r\n", 
-                euler.heading, euler.pitch, euler.roll);
-        fprintf(ofp, "LinX: %f LinY: %f LinZ: %f\r\n", 
-                linAccel.x, linAccel.y, linAccel.z);
-        fprintf(ofp, "GravX: %f GravY: %f GravZ: %f\r\n", 
-                grav.x, grav.y, grav.z);
-        fprintf(ofp, "\r\n");
+        //////////////////////////Use Data to make decisions
+        //Check Dip2 && radio state then set the motor variables accordingly
+		if(Btn && (mode * 1000000) > 1450 && mode < 1550) {
+            //Radio control mode
+			modeRC(throtle, leftright, &mr, &ml);
+		} else {
+            //all other states atmo are just dead stop
+			ml = 0;
+		    mr = 0;
+		}
+
+        ///////////////////////////Record data and decisions to file
+        //record map relevent data (not currently used)   
+        fprintf(ofp, "%d, %d, %d, ", pCount, 0, 0); 
+        //record radio values
+        fprintf(ofp, "%f, %f, %f, %f, ", throtle, leftright, estop, mode);
+        //record gps data if available
+        if (lock) {
+            fprintf(ofp, "%f, %f, %f, %d, ", Gps.time, Gps.latitude,
+                Gps.longitude, Gps.satellites);
+        } else {
+            fprintf(ofp, "NL, NL, NL, NL, NL, ");
+        }
+        //record data from IMU
+        fprintf(ofp, "%f, %f, %f, ", linAccel.x, linAccel.y, linAccel.z);
+        fprintf(ofp, "%f, %f, %f, ", euler.heading, euler.pitch, euler.roll);
+        fprintf(ofp, "%f, %f, %f, ", grav.x, grav.y, grav.z);
+        //record encoder data
+        fprintf(ofp, "%d, %d, ", lenc, renc);
+        //record motor variables
+        fprintf(ofp, "%d, %d\r\n", ml, mr);
+
+
+        /////////////////////////////use decisions to change motors
+        //Set motors
+	    MotorL.start(ml);
+		MotorR.start(mr);    
+            
+        ////////////////////////////end of loop cleanup and multiloop funcs    
+        //Increment data point count    
         pCount++;
+        //delay 10ms, this may be removed in future if we use a heavy algorithm
         wait_ms(10);
     }
 
+    //power down motors
     MotorL.start(0);
     MotorR.start(0);
+
     //Unmount the filesystem
     fprintf(ofp,"End of Program\r\n");
     fclose(ofp);
