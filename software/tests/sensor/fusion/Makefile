@@ -46,7 +46,7 @@ PROJECT := slonav
 # Objects and Paths
 
 OBJECTS += main.o
-OBJECTS += TinyEKF.o
+OBJECTS += TinyEKF/tiny_ekf.o
 OBJECTS += fusion.o
 OBJECTS += ../gps/GPS.o
 OBJECTS += ../imu/imu.o
@@ -195,6 +195,7 @@ INCLUDE_PATHS += -I../.
 INCLUDE_PATHS += -I../../imu
 INCLUDE_PATHS += -I../../gps
 INCLUDE_PATHS += -I../../radio
+INCLUDE_PATHS += -I../TinyEKF
 INCLUDE_PATHS += -I../../../mbed
 INCLUDE_PATHS += -I../../../mbed/mbed-dev
 INCLUDE_PATHS += -I../../../mbed/mbed-dev/cmsis
