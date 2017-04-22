@@ -46,6 +46,23 @@ PROJECT := slonav
 # Objects and Paths
 
 OBJECTS += main.o
+OBJECTS += PID.o
+OBJECTS += ../../data/SDFileSystem/SDFileSystem.o
+OBJECTS += ../../data/SDFileSystem/SDCRC.o
+OBJECTS += ../../data/SDFileSystem/FATFileSystem/FATDirHandle.o
+OBJECTS += ../../data/SDFileSystem/FATFileSystem/FATFileHandle.o
+OBJECTS += ../../data/SDFileSystem/FATFileSystem/FATFileSystem.o
+OBJECTS += ../../data/SDFileSystem/FATFileSystem/ChaN/ccsbcs.o
+OBJECTS += ../../data/SDFileSystem/FATFileSystem/ChaN/diskio.o
+OBJECTS += ../../data/SDFileSystem/FATFileSystem/ChaN/ff.o
+OBJECTS += ../../sensor/imu/imu.o
+OBJECTS += ../../sensor/radio/PwmIn.o
+OBJECTS += ../../sensor/gps/GPS.o
+OBJECTS += ../../sensor/fusion/fusion.o
+OBJECTS += ../../sensor/fusion/TinyEKF/tiny_ekf.o
+OBJECTS += ../../actuator/motor_model/motor.o
+OBJECTS += ../../actuator/motor_model/QEI.o
+
 
 OBJECTS += ../../mbed/mbed-dev/drivers/AnalogIn.o
 OBJECTS += ../../mbed/mbed-dev/drivers/BusIn.o
@@ -186,6 +203,18 @@ OBJECTS += ../../mbed/mbed-dev/targets/TARGET_STM/trng_api.o
 OBJECTS += ../../mbed/mbed-dev/targets/TARGET_STM/us_ticker_16b.o
 OBJECTS += ../../mbed/mbed-dev/targets/TARGET_STM/us_ticker_32b.o
 
+
+INCLUDE_PATHS += -I../
+INCLUDE_PATHS += -I../.
+INCLUDE_PATHS += -I../../../data/SDFileSystem
+INCLUDE_PATHS += -I../../../data/SDFileSystem/FATFileSystem
+INCLUDE_PATHS += -I../../../data/SDFileSystem/FATFileSystem/ChaN
+INCLUDE_PATHS += -I../../../sensor/imu
+INCLUDE_PATHS += -I../../../sensor/gps
+INCLUDE_PATHS += -I../../../sensor/radio
+INCLUDE_PATHS += -I../../../sensor/fusion
+INCLUDE_PATHS += -I../../../sensor/fusion/TinyEKF
+INCLUDE_PATHS += -I../../../actuator/motor_model
 INCLUDE_PATHS += -I../../../mbed
 INCLUDE_PATHS += -I../../../mbed/mbed-dev
 INCLUDE_PATHS += -I../../../mbed/mbed-dev/cmsis
