@@ -3,8 +3,9 @@
  * 4/5/2017
  *
 **/
-//#include <stdlib.h>
-//#include <stdio.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "mbed.h"
 #include "pinout.h"
@@ -17,16 +18,20 @@
 #include "motor.h"
 #include "PwmIn.h"
 
-
+#define MAX_BUFF 200
 
 /* map structure */
 typedef struct Point {
-    int time;
-    int x; //need to change to GPS relevent values
-    int y;
-    int dir; //need to change to imu relevent values
-    int vel;
+    float time;
+    float lat; //need to change to GPS relevent values
+    float lon;
+    float vel; //need to change to imu relevent values
+    float velAng;
+    float accel;
+    float accelAng;
+    int init;
 } Point;
+
 
 typedef struct Map {
 
@@ -34,7 +39,7 @@ typedef struct Map {
   Point ne; //NorthEast corner of the map
   Point sw; //southwest corner of the map
   Point se; //southEast corner of the map
-    
+
   float mAccel; //Maximum allowed acceleration
   float mVel;   //Maximum allowed velocity
 
@@ -43,19 +48,199 @@ typedef struct Map {
 
 } Map;
 
+int readBound(char *line, Map *mp) {
+    char *parts;
+    int pt = -1;
+    float lat, lon;
+
+    parts = strtok(line, " ,");
+    switch (parts[0]) {
+        case 'N': pt = 0; break;
+        case 'S': pt = 2; break;
+        default : return -1;
+    }
+    switch (parts[1]) {
+        case 'W': break;
+        case 'E': pt++; break;
+        default : return -2;
+    }
+
+    parts = strtok(NULL, " ,");
+    if (!sscanf(parts, "%f", &lat))
+        return -3;
+
+    parts = strtok(NULL, " ,");
+    if (!sscanf(parts, "%f", &lon))
+        return -4;
+    switch (pt) {
+        case 0: if (!mp->nw.init) {
+                    mp->nw.lat = lat;
+                    mp->nw.lon = lon;
+                    mp->nw.init = 1;
+                } else {
+                    return -5;
+                }
+                break;
+        case 1: if (!mp->ne.init) {
+                    mp->ne.lat = lat;
+                    mp->ne.lon = lon;
+                    mp->ne.init = 1;
+                } else {
+                    return -5;
+                }
+                break;
+        case 2: if (!mp->sw.init) {
+                    mp->sw.lat = lat;
+                    mp->sw.lon = lon;
+                    mp->sw.init = 1;
+                } else {
+                    return -5;
+                }
+                break;
+        case 3: if (!mp->se.init) {
+                    mp->se.lat = lat;
+                    mp->se.lon = lon;
+                    mp->se.init = 1;
+                } else {
+                    return -5;
+                }
+                break;
+        default: return -3;
+    }
+    return 0;
+}
+
+
+int readMax(char *line, Map *mp) {
+    char *parts;
+    float vel, accel;
+    int points;
+
+    parts = strtok(line, " ,");
+    if (!sscanf(parts, "%f", &vel))
+        return -1;
+    parts = strtok(NULL, " ,");
+    if (!sscanf(parts, "%f", &accel))
+        return -1;
+    parts = strtok(NULL, " ,");
+    if (!sscanf(parts, "%d", &points))
+        return -1;
+    mp->mAccel = accel;
+    mp->mVel = vel;
+    mp->npoints = points;
+
+    return 0;
+}
+
+
+
+int readPoint(char *line, Map *mp) {
+    char *parts;
+    int order;
+    float time, lat, lon, vel, vang, accel, accelang;
+
+    if (!mp->path)
+        return -4;
+
+    parts = strtok(line, " ,");
+    if (!sscanf(parts, "%d", &order))
+        return -1;
+    parts = strtok(NULL, " ,");
+    if (!sscanf(parts, "%f", &time))
+        return -1;
+    parts = strtok(NULL, " ,");
+    if (!sscanf(parts, "%f", &lon))
+        return -1;
+    parts = strtok(NULL, " ,");
+    if (!sscanf(parts, "%f", &lat))
+        return -1;
+    parts = strtok(NULL, " ,");
+    if (!sscanf(parts, "%f", &vel))
+        return -1;
+    parts = strtok(NULL, " ,");
+    if (!sscanf(parts, "%f", &vang))
+        return -1;
+    parts = strtok(NULL, " ,");
+    if (!sscanf(parts, "%f", &accel))
+        return -1;
+    parts = strtok(NULL, " ,");
+    if (!sscanf(parts, "%f", &accelang))
+        return -1;
+
+    if (order >= mp->npoints || order < 0)
+        return -2;
+
+    if (mp->path[order].init)
+        return -3;
+
+    mp->path[order].time = time;
+    mp->path[order].lat = lat;
+    mp->path[order].lon = lon;
+    mp->path[order].vel = vel;
+    mp->path[order].velAng = vang;
+    mp->path[order].accel = accel;
+    mp->path[order].accelAng = accelang;
+    mp->path[order].init = 1;
+
+    return 0;
+}
+
+
+
+//returns 1 on success 
+//-1 on read failure
+//-2 on error parsing a boundry
+//-3 on error parsing a maximum
+//-4 on error parsing a point
+//-5 on error parsing whole line
 int readMap(FILE *fp, Map *mp) {
-//    char *line;
-//    int len;
+    char line[MAX_BUFF];
+    int end = 0;
 
     if (!fp)
         return -1;
-   
-/*    while(line = getline(&line, &len, fp) != -1) {
-        printf("%s\r\n", line);
+
+    while (!end) {
+        if (NULL == fgets(line, MAX_BUFF, fp))
+            return -1;
+        switch (line[0]) {
+            case '#': printf("Comment Line\n");
+                      break;
+
+            case 'E': end = 1;
+                      printf("End of Map\n");
+                      break;
+
+            case 'B': if (readBound(line + 1, mp))
+                        end = -2;
+                      break;
+
+            case 'M': if (readMax(line + 1, mp))
+                        end = -3;
+                      if (NULL == (mp->path = (Point *)calloc(mp->npoints, sizeof(Point))))
+                        end = -4;
+                      break;
+
+            case 'P': if (readPoint(line + 1, mp))
+                        end = -5;
+                      break;
+
+            default : printf("Invalid line:\n%s", line);
+                      end = -6;
+                      break;
+        }
     }
-*/
-    return 0;
+    return (end == 1) ? 0 : end;
 }
+
+
+
+
+
+
+
+
+
 int checkMap(Map *mp) {
     return 0;
 }
@@ -112,7 +297,14 @@ DigitalIn Dip(PB_6);
 int main()
 {
     Map mp;
+    mp.nw.init = 0;
+    mp.ne.init = 0;
+    mp.sw.init = 0;
+    mp.se.init = 0;
+
     int pCount = 0;
+    int saveCount = 0;
+    int gpsCount = 0;
 
     //radio variables
     float throtle, leftright, mode, estop;
@@ -124,7 +316,7 @@ int main()
     int lenc, renc;
 
     //gps variables
-    int lock;
+    int lock = 0;
 
     // Creates variables of reading data types
     IMU::imu_euler_t euler;
@@ -189,6 +381,10 @@ int main()
     //main loop, breaks out if estop tripped
 	while((estop = E_Stop.pulsewidth() * 1000000) < 1150 && estop > 1090) {
 
+        //incriment variables
+        saveCount++;
+        gpsCount++;
+
         ////////////////////////////Gather Data
         //get radio values
         throtle = Throt.pulsewidth();
@@ -203,8 +399,12 @@ int main()
         renc = EncoderR.getPulses();
         EncoderL.reset();
         EncoderR.reset();
-        //get gps data
-        lock = Gps.parseData();
+
+        if (gpsCount > 10) {
+            //get gps data
+            lock = Gps.parseData();
+            gpsCount = 0;
+        }
 
         //////////////////////////Use Data to make decisions
         //Check Dip2 && radio state then set the motor variables accordingly
@@ -216,28 +416,29 @@ int main()
 			ml = 0;
 		    mr = 0;
 		}
-
-        ///////////////////////////Record data and decisions to file
-        //record map relevent data (not currently used)   
-        fprintf(ofp, "%d, %d, %d, ", pCount, 0, 0); 
-        //record radio values
-        fprintf(ofp, "%f, %f, %f, %f, ", throtle, leftright, estop, mode);
-        //record gps data if available
-        if (lock) {
-            fprintf(ofp, "%f, %f, %f, %d, ", Gps.time, Gps.latitude,
-                Gps.longitude, Gps.satellites);
-        } else {
-            fprintf(ofp, "NL, NL, NL, NL, NL, ");
+        if (saveCount > 20) {
+            ///////////////////////////Record data and decisions to file
+            //record map relevent data (not currently used)   
+            fprintf(ofp, "%d, %d, %d, ", pCount, 0, 0); 
+            //record radio values
+            fprintf(ofp, "%f, %f, %f, %f, ", throtle, leftright, estop, mode);
+            //record gps data if available
+            if (lock) {
+                fprintf(ofp, "%f, %f, %f, %d, ", Gps.time, Gps.latitude,
+                    Gps.longitude, Gps.satellites);
+            } else {
+                fprintf(ofp, "NL, NL, NL, NL, ");
+            }
+            //record data from IMU
+            fprintf(ofp, "%f, %f, %f, ", linAccel.x, linAccel.y, linAccel.z);
+            fprintf(ofp, "%f, %f, %f, ", euler.heading, euler.pitch, euler.roll);
+            fprintf(ofp, "%f, %f, %f, ", grav.x, grav.y, grav.z);
+            //record encoder data
+            fprintf(ofp, "%d, %d, ", lenc, renc);
+            //record motor variables
+            fprintf(ofp, "%d, %d\r\n", ml, mr); 
+            saveCount = 0;
         }
-        //record data from IMU
-        fprintf(ofp, "%f, %f, %f, ", linAccel.x, linAccel.y, linAccel.z);
-        fprintf(ofp, "%f, %f, %f, ", euler.heading, euler.pitch, euler.roll);
-        fprintf(ofp, "%f, %f, %f, ", grav.x, grav.y, grav.z);
-        //record encoder data
-        fprintf(ofp, "%d, %d, ", lenc, renc);
-        //record motor variables
-        fprintf(ofp, "%d, %d\r\n", ml, mr);
-
 
         /////////////////////////////use decisions to change motors
         //Set motors
@@ -247,6 +448,9 @@ int main()
         ////////////////////////////end of loop cleanup and multiloop funcs    
         //Increment data point count    
         pCount++;
+        gpsCount++;
+        saveCount++;
+
         //delay 10ms, this may be removed in future if we use a heavy algorithm
         wait_ms(10);
     }
