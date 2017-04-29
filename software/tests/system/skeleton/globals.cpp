@@ -1,7 +1,6 @@
 /**
  * Provides global variables and objects for all top level functions
  **/
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -22,15 +21,23 @@
 
 #include "motor.h"
 
-int INIT_Global_Motors(); 
-int INIT_Global_Sensors();
-int INIT_Global_Mapping();
+int INIT_Global_Motors() {
+   MotorR.MOTOR(1, IN2A, IN1A, ENA, true);
+   MotorL.MOTOR(2, IN2B, IN1B, ENB, true);
+}
+
+int INIT_Global_Sensors() {
+
+}
+
+int INIT_Global_Mapping() {
+
+}
 
 
 /**********************************************************/
 /******************      Motors         *******************/  
-extern MOTOR MotorR;
-extern MOTOR MotorL;
+
 
  
 /**********************************************************/
@@ -43,32 +50,33 @@ extern MOTOR MotorL;
 /**********************************************************/
 
 /** IMU **/
-extern IMU Imu;
+IMU imu(I2C_SDA, I2C_SCL, BNO055_G_CHIP_ADDR, true);
 
 /** Encoders **/
-extern QEI EncoderL;
-extern QEI EncoderR;
+QEI EncoderL(CHA1, CHB1, NC, 192, QEI::X4_ENCODING);
+QEI EncoderR(CHA2, CHB2, NC, 192, QEI::X4_ENCODING);
 
 /** GPS **/
-extern GPS Gps;
+GPS Gps(GPTX, GPRX);
 
 
 /** Radio **/
-extern PwmIn Throt;
-extern PwmIn Lr;
-extern PwmIn Mode;
-extern PwmIn E_Stop;
+PwmIn Throt(THRO);
+PwmIn Lr(LRIN);
+PwmIn Mode(MODE);
+PwmIn E_Stop(ESTO);
 
 /** Buttons **/
-extern DigitalIn Btn;
-extern DigitalIn Dip;
+DigitalIn Btn(PC_0);
+DigitalIn Dip(PB_6);
 
 
 
  
 /**********************************************************/
 /******************      Mapping        *******************/  
-extern SDFileSystem Sd
+SDFileSystem sd(DI, DO, CLK, CS, "sd");
+
 
 
 

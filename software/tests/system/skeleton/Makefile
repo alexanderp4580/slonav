@@ -46,6 +46,10 @@ PROJECT := slonav
 # Objects and Paths
 
 OBJECTS += main.o
+<<<<<<< HEAD
+=======
+OBJECTS += mappers.o
+>>>>>>> 996d588127c65d7bfd1e411aa2ef60ec3aff31d7
 OBJECTS += SDFileSystem/SDFileSystem.o
 OBJECTS += SDFileSystem/SDCRC.o
 OBJECTS += SDFileSystem/FATFileSystem/FATDirHandle.o
