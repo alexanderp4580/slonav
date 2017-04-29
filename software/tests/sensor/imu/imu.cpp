@@ -29,7 +29,7 @@ IMU::IMU(PinName sda, PinName scl, char chip_addr,  bool verbose, PinName tx, Pi
     setOpMode(OPERATION_MODE_CONFIG);
     setPwrMode(POWER_MODE_NORMAL);
     setUnits();
-    setOpMode(OPERATION_MODE_NDOF);
+    setOpMode(OPERATION_MODE_IMUPLUS);
 }
 
 //------------------------------------------------------------------------------
