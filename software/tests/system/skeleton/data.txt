@@ -1,0 +1,960 @@
+Data Point: 0
+Motor OFF
+GPS: No LOCK
+EncoderL: 1
+EncoderR: 0
+Data Point 0
+Heading: 185.125000 Pitch: -3.687500 Roll: -2.812500
+LinX: -5.000000 LinY: -1.000000 LinZ: 4.000000
+GravX: -64.000000 GravY: -48.000000 GravZ: 977.000000
+
+Data Point: 1
+Motor OFF
+time: 0.000000
+latatude: 35.302769
+longitude: -120.663933
+Satilites: 4
+EncoderL: 0
+EncoderR: 0
+Data Point 1
+Heading: 185.125000 Pitch: -3.687500 Roll: -2.750000
+LinX: -6.000000 LinY: -1.000000 LinZ: 6.000000
+GravX: -64.000000 GravY: -47.000000 GravZ: 977.000000
+
+Data Point: 2
+Motor OFF
+time: 0.000000
+latatude: 35.302769
+longitude: -120.663933
+Satilites: 4
+EncoderL: 0
+EncoderR: 0
+Data Point 2
+Heading: 185.125000 Pitch: -3.687500 Roll: -2.750000
+LinX: -7.000000 LinY: -3.000000 LinZ: 0.000000
+GravX: -64.000000 GravY: -47.000000 GravZ: 977.000000
+
+Data Point: 3
+Motor OFF
+time: 0.000000
+latatude: 35.302773
+longitude: -120.663933
+Satilites: 4
+EncoderL: 0
+EncoderR: 0
+Data Point 3
+Heading: 185.125000 Pitch: -3.687500 Roll: -2.750000
+LinX: -3.000000 LinY: -4.000000 LinZ: 4.000000
+GravX: -64.000000 GravY: -47.000000 GravZ: 977.000000
+
+Data Point: 4
+Motor OFF
+time: 0.000000
+latatude: 35.302773
+longitude: -120.663933
+Satilites: 4
+EncoderL: 0
+EncoderR: 0
+Data Point 4
+Heading: 185.125000 Pitch: -3.687500 Roll: -2.750000
+LinX: -5.000000 LinY: -3.000000 LinZ: 8.000000
+GravX: -64.000000 GravY: -47.000000 GravZ: 977.000000
+
+Data Point: 5
+Motor OFF
+time: 0.000000
+latatude: 35.302773
+longitude: -120.663933
+Satilites: 4
+EncoderL: 0
+EncoderR: 0
+Data Point 5
+Heading: 185.125000 Pitch: -3.687500 Roll: -2.750000
+LinX: -4.000000 LinY: -2.000000 LinZ: 6.000000
+GravX: -64.000000 GravY: -47.000000 GravZ: 977.000000
+
+Data Point: 6
+Motor OFF
+time: 0.000000
+latatude: 35.302773
+longitude: -120.663933
+Satilites: 4
+EncoderL: 0
+EncoderR: 0
+Data Point 6
+Heading: 185.125000 Pitch: -3.687500 Roll: -2.750000
+LinX: -4.000000 LinY: -3.000000 LinZ: 5.000000
+GravX: -64.000000 GravY: -47.000000 GravZ: 977.000000
+
+Data Point: 7
+Motor OFF
+time: 0.000000
+latatude: 35.302776
+longitude: -120.663933
+Satilites: 4
+EncoderL: 0
+EncoderR: 0
+Data Point 7
+Heading: 185.125000 Pitch: -3.687500 Roll: -2.750000
+LinX: -6.000000 LinY: -4.000000 LinZ: 5.000000
+GravX: -64.000000 GravY: -47.000000 GravZ: 977.000000
+
+Data Point: 8
+Motor OFF
+time: 0.000000
+latatude: 35.302776
+longitude: -120.663933
+Satilites: 4
+EncoderL: 0
+EncoderR: 0
+Data Point 8
+Heading: 185.125000 Pitch: -3.687500 Roll: -2.750000
+LinX: -8.000000 LinY: -4.000000 LinZ: 6.000000
+GravX: -64.000000 GravY: -47.000000 GravZ: 977.000000
+
+Data Point: 9
+Motor OFF
+time: 0.000000
+latatude: 35.302776
+longitude: -120.663933
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 9
+Heading: 185.125000 Pitch: -3.687500 Roll: -2.750000
+LinX: -3.000000 LinY: -4.000000 LinZ: 3.000000
+GravX: -64.000000 GravY: -47.000000 GravZ: 977.000000
+
+Data Point: 10
+Motor OFF
+time: 0.000000
+latatude: 35.302784
+longitude: -120.663933
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 10
+Heading: 185.125000 Pitch: -3.687500 Roll: -2.750000
+LinX: -6.000000 LinY: -1.000000 LinZ: 11.000000
+GravX: -64.000000 GravY: -47.000000 GravZ: 977.000000
+
+Data Point: 11
+Motor OFF
+time: 0.000000
+latatude: 35.302784
+longitude: -120.663933
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 11
+Heading: 185.125000 Pitch: -3.687500 Roll: -2.750000
+LinX: -6.000000 LinY: -3.000000 LinZ: 11.000000
+GravX: -64.000000 GravY: -47.000000 GravZ: 977.000000
+
+Data Point: 12
+Motor OFF
+time: 0.000000
+latatude: 35.302788
+longitude: -120.663933
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 12
+Heading: 185.125000 Pitch: -3.687500 Roll: -2.750000
+LinX: -5.000000 LinY: -2.000000 LinZ: 10.000000
+GravX: -64.000000 GravY: -47.000000 GravZ: 977.000000
+
+Data Point: 13
+Motor OFF
+time: 0.000000
+latatude: 35.302792
+longitude: -120.663933
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 13
+Heading: 185.125000 Pitch: -3.687500 Roll: -2.750000
+LinX: -5.000000 LinY: -3.000000 LinZ: 5.000000
+GravX: -64.000000 GravY: -47.000000 GravZ: 977.000000
+
+Data Point: 14
+Motor OFF
+time: 0.000000
+latatude: 35.302792
+longitude: -120.663933
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 14
+Heading: 185.125000 Pitch: -3.687500 Roll: -2.750000
+LinX: -5.000000 LinY: -4.000000 LinZ: 8.000000
+GravX: -64.000000 GravY: -47.000000 GravZ: 977.000000
+
+Data Point: 15
+Motor OFF
+time: 0.000000
+latatude: 35.302795
+longitude: -120.663933
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 15
+Heading: 185.125000 Pitch: -3.687500 Roll: -2.750000
+LinX: -6.000000 LinY: -3.000000 LinZ: 14.000000
+GravX: -64.000000 GravY: -47.000000 GravZ: 977.000000
+
+Data Point: 16
+Motor OFF
+time: 0.000000
+latatude: 35.302799
+longitude: -120.663933
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 16
+Heading: 185.125000 Pitch: -3.687500 Roll: -2.750000
+LinX: -5.000000 LinY: -3.000000 LinZ: 6.000000
+GravX: -64.000000 GravY: -47.000000 GravZ: 977.000000
+
+Data Point: 17
+Motor OFF
+time: 0.000000
+latatude: 35.302799
+longitude: -120.663933
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 17
+Heading: 185.125000 Pitch: -3.687500 Roll: -2.750000
+LinX: -3.000000 LinY: -4.000000 LinZ: 9.000000
+GravX: -64.000000 GravY: -47.000000 GravZ: 977.000000
+
+Data Point: 18
+Motor OFF
+time: 0.000000
+latatude: 35.302803
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 18
+Heading: 185.250000 Pitch: -3.687500 Roll: -2.937500
+LinX: -3.000000 LinY: -3.000000 LinZ: 6.000000
+GravX: -63.000000 GravY: -51.000000 GravZ: 977.000000
+
+Data Point: 19
+Motor ON
+time: 0.000000
+latatude: 35.302803
+longitude: -120.663948
+Satilites: 5
+EncoderL: 7154
+EncoderR: -6504
+Data Point 19
+Heading: 185.187500 Pitch: -3.750000 Roll: -2.875000
+LinX: -7.000000 LinY: -8.000000 LinZ: 14.000000
+GravX: -64.000000 GravY: -50.000000 GravZ: 977.000000
+
+Data Point: 20
+Motor ON
+time: 0.000000
+latatude: 35.302803
+longitude: -120.663948
+Satilites: 5
+EncoderL: 7564
+EncoderR: -7167
+Data Point 20
+Heading: 185.187500 Pitch: -3.750000 Roll: -2.875000
+LinX: -10.000000 LinY: -2.000000 LinZ: 16.000000
+GravX: -65.000000 GravY: -50.000000 GravZ: 977.000000
+
+Data Point: 21
+Motor ON
+time: 0.000000
+latatude: 35.302807
+longitude: -120.663948
+Satilites: 5
+EncoderL: 7694
+EncoderR: -7271
+Data Point 21
+Heading: 185.187500 Pitch: -3.750000 Roll: -2.937500
+LinX: -18.000000 LinY: 21.000000 LinZ: 6.000000
+GravX: -64.000000 GravY: -50.000000 GravZ: 977.000000
+
+Data Point: 22
+Motor ON
+time: 0.000000
+latatude: 35.302807
+longitude: -120.663948
+Satilites: 5
+EncoderL: 8662
+EncoderR: -8186
+Data Point 22
+Heading: 185.187500 Pitch: -3.687500 Roll: -3.000000
+LinX: 1.000000 LinY: -1.000000 LinZ: 29.000000
+GravX: -64.000000 GravY: -51.000000 GravZ: 977.000000
+
+Data Point: 23
+Motor ON
+time: 0.000000
+latatude: 35.302807
+longitude: -120.663948
+Satilites: 5
+EncoderL: 6906
+EncoderR: -6526
+Data Point 23
+Heading: 185.187500 Pitch: -3.750000 Roll: -3.062500
+LinX: -4.000000 LinY: -9.000000 LinZ: 37.000000
+GravX: -64.000000 GravY: -52.000000 GravZ: 977.000000
+
+Data Point: 24
+Motor ON
+time: 0.000000
+latatude: 35.302811
+longitude: -120.663948
+Satilites: 5
+EncoderL: 7506
+EncoderR: -7085
+Data Point 24
+Heading: 185.187500 Pitch: -3.687500 Roll: -3.062500
+LinX: -36.000000 LinY: 3.000000 LinZ: -9.000000
+GravX: -64.000000 GravY: -52.000000 GravZ: 977.000000
+
+Data Point: 25
+Motor ON
+time: 0.000000
+latatude: 35.302811
+longitude: -120.663948
+Satilites: 5
+EncoderL: 7929
+EncoderR: -7489
+Data Point 25
+Heading: 185.187500 Pitch: -3.687500 Roll: -3.125000
+LinX: -11.000000 LinY: 0.000000 LinZ: -35.000000
+GravX: -64.000000 GravY: -54.000000 GravZ: 977.000000
+
+Data Point: 26
+Motor ON
+time: 0.000000
+latatude: 35.302811
+longitude: -120.663948
+Satilites: 5
+EncoderL: 7513
+EncoderR: -7099
+Data Point 26
+Heading: 185.187500 Pitch: -3.687500 Roll: -3.062500
+LinX: -3.000000 LinY: 5.000000 LinZ: 6.000000
+GravX: -63.000000 GravY: -53.000000 GravZ: 977.000000
+
+Data Point: 27
+Motor ON
+time: 0.000000
+latatude: 35.302811
+longitude: -120.663948
+Satilites: 5
+EncoderL: 9790
+EncoderR: -9248
+Data Point 27
+Heading: 185.187500 Pitch: -3.750000 Roll: -3.125000
+LinX: 4.000000 LinY: 13.000000 LinZ: 0.000000
+GravX: -65.000000 GravY: -54.000000 GravZ: 977.000000
+
+Data Point: 28
+Motor ON
+time: 0.000000
+latatude: 35.302811
+longitude: -120.663948
+Satilites: 5
+EncoderL: 5686
+EncoderR: -5376
+Data Point 28
+Heading: 185.187500 Pitch: -3.687500 Roll: -3.000000
+LinX: -6.000000 LinY: 12.000000 LinZ: 17.000000
+GravX: -63.000000 GravY: -51.000000 GravZ: 977.000000
+
+Data Point: 29
+Motor ON
+time: 0.000000
+latatude: 35.302811
+longitude: -120.663948
+Satilites: 5
+EncoderL: 7720
+EncoderR: -7302
+Data Point 29
+Heading: 185.125000 Pitch: -3.687500 Roll: -2.812500
+LinX: -18.000000 LinY: 10.000000 LinZ: 38.000000
+GravX: -63.000000 GravY: -48.000000 GravZ: 977.000000
+
+Data Point: 30
+Motor OFF
+time: 0.000000
+latatude: 35.302811
+longitude: -120.663948
+Satilites: 5
+EncoderL: 271
+EncoderR: -545
+Data Point 30
+Heading: 185.187500 Pitch: -3.750000 Roll: -3.125000
+LinX: -2.000000 LinY: 3.000000 LinZ: 11.000000
+GravX: -65.000000 GravY: -53.000000 GravZ: 977.000000
+
+Data Point: 31
+Motor OFF
+time: 0.000000
+latatude: 35.302811
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 31
+Heading: 185.187500 Pitch: -3.750000 Roll: -3.125000
+LinX: -4.000000 LinY: 2.000000 LinZ: 13.000000
+GravX: -65.000000 GravY: -53.000000 GravZ: 977.000000
+
+Data Point: 32
+Motor OFF
+time: 0.000000
+latatude: 35.302811
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 32
+Heading: 185.187500 Pitch: -3.750000 Roll: -3.125000
+LinX: -5.000000 LinY: 0.000000 LinZ: 0.000000
+GravX: -65.000000 GravY: -53.000000 GravZ: 977.000000
+
+Data Point: 33
+Motor OFF
+time: 0.000000
+latatude: 35.302811
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 33
+Heading: 185.187500 Pitch: -3.750000 Roll: -3.125000
+LinX: -3.000000 LinY: 3.000000 LinZ: 11.000000
+GravX: -65.000000 GravY: -53.000000 GravZ: 977.000000
+
+Data Point: 34
+Motor OFF
+time: 0.000000
+latatude: 35.302811
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 34
+Heading: 185.187500 Pitch: -3.750000 Roll: -3.125000
+LinX: -4.000000 LinY: 3.000000 LinZ: 10.000000
+GravX: -65.000000 GravY: -53.000000 GravZ: 977.000000
+
+Data Point: 35
+Motor OFF
+time: 0.000000
+latatude: 35.302811
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 35
+Heading: 185.187500 Pitch: -3.750000 Roll: -3.125000
+LinX: -3.000000 LinY: 3.000000 LinZ: 9.000000
+GravX: -65.000000 GravY: -53.000000 GravZ: 977.000000
+
+Data Point: 36
+Motor OFF
+time: 0.000000
+latatude: 35.302814
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 36
+Heading: 185.187500 Pitch: -3.750000 Roll: -3.125000
+LinX: -5.000000 LinY: 2.000000 LinZ: 6.000000
+GravX: -65.000000 GravY: -53.000000 GravZ: 977.000000
+
+Data Point: 37
+Motor OFF
+time: 0.000000
+latatude: 35.302814
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 37
+Heading: 185.187500 Pitch: -3.750000 Roll: -3.125000
+LinX: -6.000000 LinY: 2.000000 LinZ: 8.000000
+GravX: -65.000000 GravY: -53.000000 GravZ: 977.000000
+
+Data Point: 38
+Motor OFF
+time: 0.000000
+latatude: 35.302814
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 38
+Heading: 185.187500 Pitch: -3.750000 Roll: -3.062500
+LinX: 3.000000 LinY: 3.000000 LinZ: 15.000000
+GravX: -64.000000 GravY: -52.000000 GravZ: 977.000000
+
+Data Point: 39
+Motor OFF
+time: 0.000000
+latatude: 35.302814
+longitude: -120.663933
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 39
+Heading: 185.187500 Pitch: -3.750000 Roll: -3.125000
+LinX: -1.000000 LinY: -1.000000 LinZ: 6.000000
+GravX: -64.000000 GravY: -54.000000 GravZ: 977.000000
+
+Data Point: 40
+Motor OFF
+time: 0.000000
+latatude: 35.302814
+longitude: -120.663933
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 40
+Heading: 185.187500 Pitch: -3.875000 Roll: -3.062500
+LinX: -2.000000 LinY: 3.000000 LinZ: 2.000000
+GravX: -67.000000 GravY: -52.000000 GravZ: 976.000000
+
+Data Point: 41
+Motor ON
+time: 0.000000
+latatude: 35.302818
+longitude: -120.663948
+Satilites: 5
+EncoderL: 7177
+EncoderR: -6513
+Data Point 41
+Heading: 185.187500 Pitch: -3.937500 Roll: -3.062500
+LinX: 11.000000 LinY: -7.000000 LinZ: -11.000000
+GravX: -67.000000 GravY: -53.000000 GravZ: 976.000000
+
+Data Point: 42
+Motor ON
+time: 0.000000
+latatude: 35.302818
+longitude: -120.663948
+Satilites: 5
+EncoderL: 8653
+EncoderR: -8202
+Data Point 42
+Heading: 185.187500 Pitch: -3.937500 Roll: -2.937500
+LinX: 12.000000 LinY: 0.000000 LinZ: -7.000000
+GravX: -67.000000 GravY: -51.000000 GravZ: 976.000000
+
+Data Point: 43
+Motor ON
+time: 0.000000
+latatude: 35.302818
+longitude: -120.663948
+Satilites: 5
+EncoderL: 6764
+EncoderR: -6414
+Data Point 43
+Heading: 185.187500 Pitch: -4.000000 Roll: -3.000000
+LinX: 32.000000 LinY: -5.000000 LinZ: -69.000000
+GravX: -68.000000 GravY: -51.000000 GravZ: 976.000000
+
+Data Point: 44
+Motor ON
+time: 0.000000
+latatude: 35.302818
+longitude: -120.663948
+Satilites: 5
+EncoderL: 7784
+EncoderR: -7384
+Data Point 44
+Heading: 185.187500 Pitch: -3.937500 Roll: -2.750000
+LinX: 1.000000 LinY: 8.000000 LinZ: -50.000000
+GravX: -68.000000 GravY: -47.000000 GravZ: 977.000000
+
+Data Point: 45
+Motor ON
+time: 0.000000
+latatude: 35.302818
+longitude: -120.663948
+Satilites: 5
+EncoderL: 7802
+EncoderR: -7410
+Data Point 45
+Heading: 185.187500 Pitch: -4.062500 Roll: -2.812500
+LinX: 14.000000 LinY: -2.000000 LinZ: 13.000000
+GravX: -69.000000 GravY: -48.000000 GravZ: 976.000000
+
+Data Point: 46
+Motor ON
+time: 0.000000
+latatude: 35.302822
+longitude: -120.663948
+Satilites: 5
+EncoderL: 7651
+EncoderR: -7266
+Data Point 46
+Heading: 185.187500 Pitch: -4.125000 Roll: -2.750000
+LinX: -19.000000 LinY: 13.000000 LinZ: 68.000000
+GravX: -70.000000 GravY: -47.000000 GravZ: 976.000000
+
+Data Point: 47
+Motor ON
+time: 0.000000
+latatude: 35.302822
+longitude: -120.663948
+Satilites: 5
+EncoderL: 8619
+EncoderR: -8392
+Data Point 47
+Heading: 185.187500 Pitch: -4.187500 Roll: -2.750000
+LinX: 37.000000 LinY: 22.000000 LinZ: 63.000000
+GravX: -71.000000 GravY: -47.000000 GravZ: 976.000000
+
+Data Point: 48
+Motor ON
+time: 0.000000
+latatude: 35.302822
+longitude: -120.663948
+Satilites: 5
+EncoderL: 6725
+EncoderR: -6392
+Data Point 48
+Heading: 185.187500 Pitch: -4.125000 Roll: -2.687500
+LinX: 5.000000 LinY: -3.000000 LinZ: 22.000000
+GravX: -71.000000 GravY: -46.000000 GravZ: 976.000000
+
+Data Point: 49
+Motor ON
+time: 0.000000
+latatude: 35.302822
+longitude: -120.663948
+Satilites: 5
+EncoderL: 7711
+EncoderR: -7326
+Data Point 49
+Heading: 185.250000 Pitch: -4.250000 Roll: -2.750000
+LinX: 16.000000 LinY: 8.000000 LinZ: -66.000000
+GravX: -72.000000 GravY: -46.000000 GravZ: 976.000000
+
+Data Point: 50
+Motor OFF
+time: 0.000000
+latatude: 35.302830
+longitude: -120.663948
+Satilites: 5
+EncoderL: 272
+EncoderR: -549
+Data Point 50
+Heading: 185.250000 Pitch: -4.250000 Roll: -2.687500
+LinX: 4.000000 LinY: -3.000000 LinZ: 0.000000
+GravX: -73.000000 GravY: -46.000000 GravZ: 976.000000
+
+Data Point: 51
+Motor OFF
+time: 0.000000
+latatude: 35.302830
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 51
+Heading: 185.250000 Pitch: -4.250000 Roll: -2.687500
+LinX: 3.000000 LinY: -6.000000 LinZ: 10.000000
+GravX: -73.000000 GravY: -46.000000 GravZ: 976.000000
+
+Data Point: 52
+Motor OFF
+time: 0.000000
+latatude: 35.302834
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 52
+Heading: 185.250000 Pitch: -4.250000 Roll: -2.687500
+LinX: 4.000000 LinY: -6.000000 LinZ: 13.000000
+GravX: -73.000000 GravY: -46.000000 GravZ: 976.000000
+
+Data Point: 53
+Motor OFF
+time: 0.000000
+latatude: 35.302834
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 53
+Heading: 185.250000 Pitch: -4.250000 Roll: -2.687500
+LinX: 3.000000 LinY: -4.000000 LinZ: 4.000000
+GravX: -73.000000 GravY: -46.000000 GravZ: 976.000000
+
+Data Point: 54
+Motor OFF
+time: 0.000000
+latatude: 35.302834
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 54
+Heading: 185.250000 Pitch: -4.250000 Roll: -2.687500
+LinX: 4.000000 LinY: -6.000000 LinZ: 9.000000
+GravX: -73.000000 GravY: -46.000000 GravZ: 976.000000
+
+Data Point: 55
+Motor OFF
+time: 0.000000
+latatude: 35.302837
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 55
+Heading: 185.250000 Pitch: -4.250000 Roll: -2.687500
+LinX: 4.000000 LinY: -4.000000 LinZ: 11.000000
+GravX: -73.000000 GravY: -46.000000 GravZ: 976.000000
+
+Data Point: 56
+Motor OFF
+time: 0.000000
+latatude: 35.302837
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 56
+Heading: 185.250000 Pitch: -4.250000 Roll: -2.687500
+LinX: 4.000000 LinY: -6.000000 LinZ: 6.000000
+GravX: -73.000000 GravY: -46.000000 GravZ: 976.000000
+
+Data Point: 57
+Motor OFF
+time: 0.000000
+latatude: 35.302841
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 57
+Heading: 185.250000 Pitch: -4.250000 Roll: -2.687500
+LinX: 5.000000 LinY: -7.000000 LinZ: 12.000000
+GravX: -73.000000 GravY: -46.000000 GravZ: 976.000000
+
+Data Point: 58
+Motor OFF
+time: 0.000000
+latatude: 35.302841
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 58
+Heading: 185.250000 Pitch: -4.250000 Roll: -2.687500
+LinX: 0.000000 LinY: -7.000000 LinZ: 9.000000
+GravX: -73.000000 GravY: -46.000000 GravZ: 976.000000
+
+Data Point: 59
+Motor OFF
+time: 0.000000
+latatude: 35.302845
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 59
+Heading: 185.250000 Pitch: -4.250000 Roll: -2.687500
+LinX: 4.000000 LinY: -6.000000 LinZ: 1.000000
+GravX: -73.000000 GravY: -46.000000 GravZ: 976.000000
+
+Data Point: 60
+Motor OFF
+time: 0.000000
+latatude: 35.302849
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 60
+Heading: 185.187500 Pitch: -4.375000 Roll: -2.500000
+LinX: 4.000000 LinY: -13.000000 LinZ: 3.000000
+GravX: -74.000000 GravY: -42.000000 GravZ: 976.000000
+
+Data Point: 61
+Motor ON
+time: 0.000000
+latatude: 35.302849
+longitude: -120.663948
+Satilites: 5
+EncoderL: 7166
+EncoderR: -6535
+Data Point 61
+Heading: 185.187500 Pitch: -4.437500 Roll: -2.375000
+LinX: 12.000000 LinY: -39.000000 LinZ: -50.000000
+GravX: -76.000000 GravY: -41.000000 GravZ: 976.000000
+
+Data Point: 62
+Motor ON
+time: 0.000000
+latatude: 35.302849
+longitude: -120.663948
+Satilites: 5
+EncoderL: 8680
+EncoderR: -8260
+Data Point 62
+Heading: 185.187500 Pitch: -4.437500 Roll: -2.375000
+LinX: -1.000000 LinY: 5.000000 LinZ: 37.000000
+GravX: -76.000000 GravY: -40.000000 GravZ: 976.000000
+
+Data Point: 63
+Motor ON
+time: 0.000000
+latatude: 35.302849
+longitude: -120.663948
+Satilites: 5
+EncoderL: 6879
+EncoderR: -6541
+Data Point 63
+Heading: 185.187500 Pitch: -4.437500 Roll: -2.312500
+LinX: 23.000000 LinY: -7.000000 LinZ: -43.000000
+GravX: -76.000000 GravY: -39.000000 GravZ: 976.000000
+
+Data Point: 64
+Motor ON
+time: 0.000000
+latatude: 35.302849
+longitude: -120.663948
+Satilites: 5
+EncoderL: 7932
+EncoderR: -7550
+Data Point 64
+Heading: 185.187500 Pitch: -4.312500 Roll: -2.375000
+LinX: 0.000000 LinY: -18.000000 LinZ: 12.000000
+GravX: -74.000000 GravY: -41.000000 GravZ: 976.000000
+
+Data Point: 65
+Motor ON
+time: 0.000000
+latatude: 35.302849
+longitude: -120.663948
+Satilites: 5
+EncoderL: 7375
+EncoderR: -7014
+Data Point 65
+Heading: 185.187500 Pitch: -4.312500 Roll: -2.187500
+LinX: -4.000000 LinY: 2.000000 LinZ: 36.000000
+GravX: -74.000000 GravY: -37.000000 GravZ: 977.000000
+
+Data Point: 66
+Motor ON
+time: 0.000000
+latatude: 35.302849
+longitude: -120.663948
+Satilites: 5
+EncoderL: 7798
+EncoderR: -7419
+Data Point 66
+Heading: 185.187500 Pitch: -4.312500 Roll: -2.125000
+LinX: 21.000000 LinY: -11.000000 LinZ: 0.000000
+GravX: -74.000000 GravY: -36.000000 GravZ: 977.000000
+
+Data Point: 67
+Motor ON
+time: 0.000000
+latatude: 35.302849
+longitude: -120.663948
+Satilites: 5
+EncoderL: 8821
+EncoderR: -8389
+Data Point 67
+Heading: 185.250000 Pitch: -4.375000 Roll: -2.187500
+LinX: -6.000000 LinY: 6.000000 LinZ: 15.000000
+GravX: -74.000000 GravY: -37.000000 GravZ: 977.000000
+
+Data Point: 68
+Motor OFF
+time: 0.000000
+latatude: 35.302849
+longitude: -120.663948
+Satilites: 5
+EncoderL: 491
+EncoderR: -755
+Data Point 68
+Heading: 185.312500 Pitch: -4.312500 Roll: -2.250000
+LinX: 3.000000 LinY: -17.000000 LinZ: 10.000000
+GravX: -74.000000 GravY: -39.000000 GravZ: 977.000000
+
+Data Point: 69
+Motor OFF
+time: 0.000000
+latatude: 35.302849
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 69
+Heading: 185.312500 Pitch: -4.250000 Roll: -2.312500
+LinX: 2.000000 LinY: -13.000000 LinZ: 0.000000
+GravX: -73.000000 GravY: -40.000000 GravZ: 977.000000
+
+Data Point: 70
+Motor OFF
+time: 0.000000
+latatude: 35.302849
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 70
+Heading: 185.312500 Pitch: -4.250000 Roll: -2.312500
+LinX: 3.000000 LinY: -12.000000 LinZ: 0.000000
+GravX: -73.000000 GravY: -39.000000 GravZ: 977.000000
+
+Data Point: 71
+Motor OFF
+time: 0.000000
+latatude: 35.302849
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 71
+Heading: 185.312500 Pitch: -4.250000 Roll: -2.250000
+LinX: 3.000000 LinY: -12.000000 LinZ: 0.000000
+GravX: -73.000000 GravY: -39.000000 GravZ: 977.000000
+
+Data Point: 72
+Motor OFF
+time: 0.000000
+latatude: 35.302849
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 72
+Heading: 185.312500 Pitch: -4.250000 Roll: -2.250000
+LinX: 2.000000 LinY: -15.000000 LinZ: 9.000000
+GravX: -73.000000 GravY: -39.000000 GravZ: 977.000000
+
+Data Point: 73
+Motor OFF
+time: 0.000000
+latatude: 35.302853
+longitude: -120.663948
+Satilites: 5
+EncoderL: 0
+EncoderR: 0
+Data Point 73
+Heading: 185.312500 Pitch: -4.250000 Roll: -2.250000
+LinX: 6.000000 LinY: -10.000000 LinZ: 1.000000
+GravX: -72.000000 GravY: -39.000000 GravZ: 977.000000
+
+End of Program
