@@ -38,9 +38,6 @@ MOTOR MotorL(2, IN2B, IN1B, ENB);
 QEI EncoderL(CHA1, CHB1, NC, 192, QEI::X4_ENCODING);
 QEI EncoderR(CHA2, CHB2, NC, 192, QEI::X4_ENCODING);
 
-/* IMU Objects */
-IMU Imu(IMDA, IMCL, BNO055_G_CHIP_ADDR, true);
-
 /* GPS Objects */
 GPS Gps(GPTX, GPRX);
 
