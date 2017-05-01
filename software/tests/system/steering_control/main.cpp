@@ -16,42 +16,47 @@
 #include "PwmIn.h"
 #include "PID.h"
 
-#define KP 10.0
-#define KI 1.5
-#define KD 0.0
+#define KP_STEER 5.0
+#define KI_STEER 0.0
+#define KD_STEER 0.0
 #define SPEED 40.0
-
-/* Test Objects */
-Serial Pc(USBTX,USBRX);
-
-/* file system objects */
-SDFileSystem sd(DI, DO, CLK, CS, "sd");
-
-/* IMU objects */
-IMU imu(I2C_SDA, I2C_SCL, BNO055_G_CHIP_ADDR, true);
-
-/* Motor Objects */
-MOTOR MotorR(1, IN2A, IN1A, ENA);
-MOTOR MotorL(2, IN2B, IN1B, ENB);
-
-/* Encoder Objects */
-QEI EncoderL(CHA1, CHB1, NC, 192, QEI::X4_ENCODING);
-QEI EncoderR(CHA2, CHB2, NC, 192, QEI::X4_ENCODING);
-
-/* GPS Objects */
-GPS Gps(GPTX, GPRX);
-
-/* Radio Objects */
-PwmIn Throt(THRO);
-PwmIn Lr(LRIN);
-PwmIn Mode(MODE);
-PwmIn E_Stop(ESTO);
-
-/* PID Controller */
-PID steerPID(KP, KI, KD, 0.010);
+#define INTERVAL 0.05
 
 int main()
 {
+    /* Test Objects */
+    Serial Pc(USBTX,USBRX);
+
+    /* file system objects */
+    SDFileSystem sd(DI, DO, CLK, CS, "sd");
+
+    /* IMU objects */
+    IMU imu(I2C_SDA, I2C_SCL, BNO055_G_CHIP_ADDR, true);
+
+    /* Motor Objects */
+    MOTOR MotorR(1, IN2A, IN1A, ENA);
+    MOTOR MotorL(2, IN2B, IN1B, ENB);
+
+    /* Encoder Objects */
+    QEI EncoderL(CHA1, CHB1, NC, 192, QEI::X4_ENCODING);
+    QEI EncoderR(CHA2, CHB2, NC, 192, QEI::X4_ENCODING);
+
+    /* GPS Objects */
+    GPS Gps(GPTX, GPRX);
+
+    /* Radio Objects */
+    PwmIn Throt(THRO);
+    PwmIn Lr(LRIN);
+    PwmIn Mode(MODE);
+    PwmIn E_Stop(ESTO);
+
+    /* PID Controller */
+    PID steerPID(KP_STEER, KI_STEER, KD_STEER, INTERVAL);
+
+    /* Timer */
+    Timer timer;
+
+    //data variables
     int pCount = 0;
     int saveCount = 0;
     int gpsCount = 0;
@@ -68,7 +73,6 @@ int main()
     // Creates variables of reading data types
     IMU::imu_euler_t euler;
     IMU::imu_lin_accel_t linAccel;
-    IMU::imu_gravity_t grav;
 
     // PID control variables
     float sp = 0.0;
@@ -96,16 +100,21 @@ int main()
 	MotorR.start(0);
     Pc.printf("Motors initialised\r\n");
 
-    //Getting initial heading for control loop
-    imu.getEulerAng(&euler);
-    sp = euler.heading;
+    //Getting initial heading for control loop (average 5 readings)
+    for (int i = 0; i < 5; i++)
+    {
+        imu.getEulerAng(&euler);
+        sp += euler.heading;
+        wait_ms(50);
+    }
+    sp /= 5;
     distance = 10000;
-    Pc.printf("Steering heading set\r\n");
+    Pc.printf("Steering heading set to %f\r\n", sp);
     Pc.printf("Drive distance set to %d\r\n", distance);
 
     // Initialize PID controller
     steerPID.setInputLimits(0.0, 180.0);
-    steerPID.setOutputLimits(0.0, 100.0);
+    steerPID.setOutputLimits(0, 100.0);
     steerPID.setSetPoint(sp);
 
     //print collumn catagories
@@ -113,89 +122,102 @@ int main()
     fprintf(ofp, "Point#, nearest waypoint, next waypoint, ");
     fprintf(ofp, "rcThrot, rcDir, rcE-stop, rcMode, ");
     fprintf(ofp, "time, lat, long, #sat, ");
-    fprintf(ofp, "xAcc, yAcc, zAcc, heading, pitch, role, xGra, yGra, zGra, ");
+    fprintf(ofp, "xAcc, yAcc, zAcc, heading, ");
     fprintf(ofp, "lEncoder, rEncoder, lMotor, rMotor\r\n");
 
-    //main loop, breaks out if estop tripped
+    //start timer
+    timer.start();
+
+    //main loop, stops when distance is reached
 	while(distance > 0) {
 
-        //incriment variables
-        saveCount++;
-        gpsCount++;
+        if(timer.read() > INTERVAL){
+            timer.reset();
+            //increment variables
+            saveCount++;
+            gpsCount++;
 
-        ////////////////////////////Gather Data
-        //get radio values
-        throtle = Throt.pulsewidth();
-        mode = Mode.pulsewidth();
-        leftright = Lr.pulsewidth();
-        //Read data from IMU
-        imu.getEulerAng(&euler);
-        imu.getLinAccel(&linAccel);
-        imu.getGravity(&grav);
-        //get encoder data and reset encoders
-        lenc = EncoderL.getPulses();
-        renc = EncoderR.getPulses();
-        EncoderL.reset();
-        EncoderR.reset();
+            //Gather Data
+            //get radio values
+            throtle = Throt.pulsewidth();
+            mode = Mode.pulsewidth();
+            leftright = Lr.pulsewidth();
+            //Read data from IMU
+            imu.getEulerAng(&euler);
+            imu.getLinAccel(&linAccel);
+            //get encoder data and reset encoders
+            lenc = EncoderL.getPulses();
+            renc = EncoderR.getPulses();
+            EncoderL.reset();
+            EncoderR.reset();
 
-        if (gpsCount > 10) {
-            //get gps data
-            lock = Gps.parseData();
-            gpsCount = 0;
-        }
+            // if (gpsCount > 1) {
+            //     //get gps data
+            //     lock = Gps.parseData();
+            //     gpsCount = 0;
+            // }
 
-        if (saveCount > 20) {
-            ///////////////////////////Record data and decisions to file
-            //record map relevent data (not currently used)   
-            fprintf(ofp, "%d, %d, %d, ", pCount, 0, 0); 
-            //record radio values
-            fprintf(ofp, "%f, %f, %f, %f, ", throtle, leftright, estop, mode);
-            //record gps data if available
-            if (lock) {
-                fprintf(ofp, "%f, %f, %f, %d, ", Gps.time, Gps.latitude,
-                    Gps.longitude, Gps.satellites);
-            } else {
-                fprintf(ofp, "NL, NL, NL, NL, ");
+            if (saveCount > 19) {
+                ///////////////////////////Record data and decisions to file
+                //record map relevent data (not currently used)   
+                fprintf(ofp, "%d, %d, %d, ", pCount, 0, 0); 
+                //record radio values
+                fprintf(ofp, "%f, %f, %f, %f, ", throtle, leftright, estop, mode);
+                //record gps data if available
+                if (lock) {
+                    fprintf(ofp, "%f, %f, %f, %d, ", Gps.time, Gps.latitude,Gps.longitude, Gps.satellites);
+                } else {
+                    fprintf(ofp, "NL, NL, NL, NL, ");
+                }
+                //record data from IMU
+                fprintf(ofp, "%f, %f, %f, ", linAccel.x, linAccel.y, linAccel.z);
+                fprintf(ofp, "%f, ", euler.heading);
+                //record encoder variables
+                fprintf(ofp, "%d, %d, ", lenc, renc);
+                //record motor variables
+                fprintf(ofp, "%d, %d\r\n", int(SPEED + output), int(SPEED - output)); 
+                saveCount = 0;
             }
-            //record data from IMU
-            fprintf(ofp, "%f, %f, %f, ", linAccel.x, linAccel.y, linAccel.z);
-            fprintf(ofp, "%f, %f, %f, ", euler.heading, euler.pitch, euler.roll);
-            fprintf(ofp, "%f, %f, %f, ", grav.x, grav.y, grav.z);
-            //record encoder data
-            fprintf(ofp, "%d, %d, ", lenc, renc);
-            //record motor variables
-            fprintf(ofp, "%d, %d\r\n", int(SPEED + output), int(SPEED - output)); 
-            saveCount = 0;
-        }
 
-        distance -= (lenc + renc) >> 1;
-        input = euler.heading;
-        if (input > 180.0) {
-            input -= 360.0;
-        }
-        Pc.printf("Input: %f\r\n", input);
-        steerPID.setProcessValue(input);
-        output = steerPID.compute();
-
-        /////////////////////////////use decisions to change motors
-        //Set motors
-	    MotorL.setOutput(int(SPEED + output));
-		MotorR.setOutput(int(SPEED - output));
-        Pc.printf("Output: %f\r\n", output);
+            distance -= (lenc + renc)/2;
+            input = euler.heading;
+            if (input > 180.0) {
+                input -= 360.0;
+            }
+            steerPID.setProcessValue(input);
+            output = steerPID.compute();
+            Pc.printf("Input: %f\r\n", input);
             
-        ////////////////////////////end of loop cleanup and multiloop funcs    
-        //Increment data point count    
-        pCount++;
-        gpsCount++;
-        saveCount++;
 
-        //delay 10ms, this may be removed in future if we use a heavy algorithm
-        wait_ms(10);
+            /////////////////////////////use decisions to change motors
+            //Set motors
+            if (input > 0){
+                MotorL.setOutput(int(SPEED - output));
+                MotorR.setOutput(int(SPEED + output));
+            }
+            else {
+                MotorL.setOutput(int(SPEED + output));
+                MotorR.setOutput(int(SPEED - output));
+            }
+            Pc.printf("Output: %f\r\n", output);
+                
+            ////////////////////////////end of loop cleanup and multiloop funcs    
+            //Increment data point count    
+            pCount++;
+            gpsCount++;
+            saveCount++;
+
+            Pc.printf("Loop Time: %d\r\n", timer.read_ms());
+        }
+
     }
 
     //power down motors
     MotorL.stop();
     MotorR.stop();
+
+    //stop timer
+    timer.stop();
 
     //Unmount the filesystem
     fprintf(ofp,"End of Program\r\n");
