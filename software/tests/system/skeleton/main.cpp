@@ -19,138 +19,220 @@
 #include "motor.h"
 #include "PwmIn.h"
 
-//Function allows driving by RC controler
-int modeRC(float throtle, float lrat, int *mr, int *ml) {
-	throtle *= 1000000;
-	throtle -= 1100;
-	throtle /= 8;
-	
-	lrat *= 1000000;
-	lrat -= 1000;
-	lrat /= 1000;
-	*ml = (int)((1 - lrat) * throtle);
-	*mr = (int)(lrat * throtle);
+typedef struct Buffer{
+    int b_time = 0;
+    int b_estop = 0;
+    float b_break = 0;
+    float b_A_heading = 0;
+    float b_V_heading = 0;
+    float b_accel = 0;
+    float b_vel = 0;
+    int   b_encoderAv = 0;    
+    int b_waypoint = 0;
+} Buffer;
 
-	return 0;
-}
-
-/* Test Objects */
-Serial Pc(USBTX,USBRX);
-
-/* file system objects */
-SDFileSystem sd(DI, DO, CLK, CS, "sd");
-
-/* IMU objects */
-IMU imu(I2C_SDA, I2C_SCL, BNO055_G_CHIP_ADDR, true);
-
-/* Motor Objects */
-MOTOR MotorR(1, IN2A, IN1A, ENA, true);
-MOTOR MotorL(2, IN2B, IN1B, ENB, true);
-
-/* Encoder Objects */
-QEI EncoderL(CHA1, CHB1, NC, 192, QEI::X4_ENCODING);
-QEI EncoderR(CHA2, CHB2, NC, 192, QEI::X4_ENCODING);
-
-/* IMU Objects */
-IMU Imu(IMDA, IMCL, BNO055_G_CHIP_ADDR, true);
-
-/* GPS Objects */
-GPS Gps(GPTX, GPRX);
-
-/* Radio Objects */
-PwmIn Throt(THRO);
-PwmIn Lr(LRIN);
-PwmIn Mode(MODE);
-PwmIn E_Stop(ESTO);
-
-
-/* Input Buttons */
-DigitalIn Btn(PC_0);
-DigitalIn Dip(PB_6);
 
 int main()
 {
+
+    /** the most important variable **/ 
+    int stop = 0;
+    
+
+    /** initialise map and open data file **/    
     Map mp;
     mp.nw.init = 0;
     mp.ne.init = 0;
     mp.sw.init = 0;
     mp.se.init = 0;
 
-    int pCount = 0;
-    int saveCount = 0;
-    int gpsCount = 0;
-
-    //radio variables
-    float throtle, leftright, mode, estop;
-
-    //motor variables
-    int mr, ml;
-
-    //encoder variables
-    int lenc, renc;
-
-    //gps variables
-    int lock = 0;
-
-    // Creates variables of reading data types
-    IMU::imu_euler_t euler;
-    IMU::imu_lin_accel_t linAccel;
-    IMU::imu_gravity_t grav;
-
-	
-    //Mount the filesystem
-    printf("Mounting SD card\r\n");
-    sd.mount();
-    FILE *ofp = fopen("/sd/data.txt", "w");	
-    FILE *ifp = fopen("/sd/map.mp", "r");
+    SDFileSystem sd(DI, DO, CLK, CS, "sd"); 
+    FILE *dfp = init_sd_card(sd, &mp);  //000
+    fprintf("Data File Open\n");
     
-	//infinite loop if SD card not found
-	if (ofp == NULL) {
-		Pc.printf("SD card not found\r\n");
-		while(1) ;
-	}	
-    //open map file
-	if (ifp == NULL) {
-		Pc.printf("No Map File Found! ABORT!\r\n");
-		while(1) ;
-	}
+
+    /** check dip switches **/
+    DigitalIn dipA(PC_0);
+    DigitalIn dipB(PB_6);
+    fprintf(dfp, "dipA: %d, dipB: %d\n", dipA, dipB);
+
+    int testMode = (dipA << 1) + dipB;
+    switch (testMode) {
+        case 0: fprintf(dfp, "Normal Run\n");   break
+        case 1: fprintf(dfp, "Test Sensors\n"); break;
+        case 2: fprintf(dfp, "Test ???\n");     break;
+        case 3: fprintf(dfp, "Test Motors\n");  break;
+        default: ESTOP(); //004                      break;
+    }
     
-    //parse map file into Map structure
-    if (readMap(ifp, &mp)) {
-        Pc.printf("Map parse failed\r\n");
-        while(1);
+    /************************/
+    /** initialise sensors **/
+    
+    /* Encoder Objects */
+    QEI encoderL(CHA1, CHB1, NC, 192, QEI::X4_ENCODING);
+    QEI encoderR(CHA2, CHB2, NC, 192, QEI::X4_ENCODING);
+    if (sc_encoders(encoderL, encoderR)) { //001
+        fprintf(dfp, "Encoders indicate vehical in motion: STOP\n");
+        ESTOP(); //004
+        while (1); //need to add flashing LED output
+    } else {
+        fprintf(dfp, "Encoders indicate vehical is stable\n");
+    }
+    
+    /* IMU objects */
+    IMU imu(I2C_SDA, I2C_SCL, BNO055_G_CHIP_ADDR, true);
+    if (sc_imu(imu)) {
+        fprintf(dfp, "IMU indicates vehical in motion: STOP\n");
+        ESTOP(); //004
+        while (1); //need to add flashing LED output
+    } else {
+        fprintf(dfp, "IMU indicates vehical is stable\n");
     }
 
-    //review the map structure for errors
-    if (checkMap(&mp)) {
-        Pc.printf("Map does not fit rules\r\n");
-        while(1);
+    /* GPS Objects */
+    GPS gps(GPTX, GPRX);
+    while (!gps.parseData()); /* wait for GPS lock */
+    if (sc_gps(gps)) {
+        fprintf(dfp, "GPS indicates vehical in motion: STOP\n");
+        ESTOP(); //004
+        while (1); //need to add flashing LED output
+    } else {
+        fprintf(dfp, "GPS indicates vehical is stable\n");
     }
-    //close the map file, won't be using it anymore
-    fclose(ifp);
-    Pc.printf("FileSystem ready\r\n");
-    
-	//Initialise motors
-	MotorL.start(0);
-	MotorR.start(0);
-    Pc.printf("Motors initialised\r\n");
+    fprintf(dfp, "All sensors initialised\n");
 
-    Pc.printf("Waiting on user GO\r\n");
-    //estop must transition from low to high to activate vehical
-	while ((estop = E_Stop.pulsewidth() * 1000000) < 1150 && 
-            estop > 1090)
-        ;
-	while ((estop = E_Stop.pulsewidth() * 1000000) != 1096)
-        ;
+    
+    /** initialise radio **/
+    PwmIn Throt(THRO);
+    PwmIn Lr(LRIN);
+    PwmIn Mode(MODE);
+    PwmIn E_Stop(ESTO);
+
+    int throt;
+    int lr;
+    int mode;
+    int e_stop;
+
+    throt = throt.pulsewidth() * 1000000;
+    lr = Lr.pulsewidth() * 1000000;
+    mode = Mode.pulsewidth() * 1000000
+    e_stop = E_Stop.pulsewidth() * 1000000;
+
+    if (throt < 1000 || throt > 2000) {
+        fprintf(dfp, "Radio Error on Throtle: STOP\n");
+        ESTOP(); //004
+        while (1); //need to add flashing LED output
+    }
+    if (lr < 1000 || lr > 2000) {
+        fprintf(dfp, "Radio Error on Throtle: STOP\n");
+        ESTOP(); //004
+        while (1); //need to add flashing LED output
+    }
+    if (mode < 1000 || mode > 2000) {
+        fprintf(dfp, "Radio Error on Throtle: STOP\n");
+        ESTOP(); //004
+        while (1); //need to add flashing LED output
+    }
+    if (e_stop < 1000 || e_stop > 2000) {
+        fprintf(dfp, "Radio Error on Throtle: STOP\n");
+        ESTOP(); //004
+        while (1); //need to add flashing LED output
+    }
+    fprintf(dfp, "All Radio Channels look good\n");
+
+        
+    /** wait for user to signal safe via E-Stop **/
+    /* estop must transition from low to high to activate vehical */
+    while (e_stop > 1500 && estop < 2000) { //need constants for all radio values
+        signal_for_go() //002
+        e_stop = E_Stop.pulsewidth() * 1000000;
+    }
+    if (e_stop > 2000 || e_stop < 1000) { //105
+        fprintf(dfp, "Radio Error on e-stop: STOP\n");
+        ESTOP(); //004
+    }
+    while (e_stop > 1000 && estop < 1500) {  //need constants for all radio values
+        signal_for_go() //002
+        e_stop = E_Stop.pulsewidth() * 1000000;
+    }
+    if (e_stop > 2000 || e_stop < 1000) { //105
+        fprintf(dfp, "Radio Error on e-stop: STOP\n");
+        ESTOP(); //004
+    }
+    gps.parseData();
+    printf(dfp, "E_stop released at t = %f\n", gps.time);
+
+    
+    /** initialise motors **/
+    MOTOR MotorR(1, IN2A, IN1A, ENA, true);
+    MOTOR MotorL(2, IN2B, IN1B, ENB, true);
+    
+    if (check_power()) { //003
+        fprintf(dfp, "Main power in nonvalid state: STOP\n");
+        ESTOP(); //004
+        while (1); //need to add flashing LED output also this one should be a full power down. oh and the sd card need to unmount
+    }
+       
+
+    /** init main contactor **/ 
+    //init main contactori
+    fprintf(dfp,"Trigger Warning\n");
+    trigger_main_contactor();
     
 
-    //print collumn catagories
-    Pc.printf("User GO accepted starting run\r\n");
+    
+    /** print collumn catagories **/
+    Pc.printf("User GO accepted starting run\n\n");
     fprintf(ofp, "Point#, nearest waypoint, next waypoint, ");
     fprintf(ofp, "rcThrot, rcDir, rcE-stop, rcMode, ");
     fprintf(ofp, "time, lat, long, #sat, ");
     fprintf(ofp, "xAcc, yAcc, zAcc, heading, pitch, role, xGra, yGra, zGra, ");
-    fprintf(ofp, "lEncoder, rEncoder, lMotor, rMotor\r\n");
+    fprintf(ofp, "lEncoder, rEncoder, lMotor, rMotor\n");
+
+
+    /** init data buffer variables **/
+    Buffer cache;
+
+    /** init timing variables **/
+    unsigned long time = 0;
+    unsigned long dtime = 0;
+
+
+
+    /*************************/
+    /*************************/
+    /***  Enter main loop! ***/
+    while (!stop) {
+
+
+
+        if (printer(&cache)) {
+            cache.b_time = gps.time;
+            cache.b_estop = e_stop;
+            cache.b_Aheading
+    int b_time = 0;
+    int b_estop = 0;
+    float b_A_heading = 0;
+    float b_V_heading = 0;
+    float b_accel = 0;
+    float b_vel = 0;
+    int   b_encoderAv = 0;    
+    int b_waypoint = 0;
+    
+    
+    
+    
+    }
+    
+
+
+
+
+
+
+    
+
+
 
     //main loop, breaks out if estop tripped
 	while((estop = E_Stop.pulsewidth() * 1000000) < 1150 && estop > 1090) {
@@ -226,21 +308,22 @@ int main()
         saveCount++;
 
         //delay 10ms, this may be removed in future if we use a heavy algorithm
-        wait_ms(10);
+
     }
 
-    //power down motors
-    MotorL.start(0);
-    MotorR.start(0);
+    /** power down motors **/
+    motorL.start(0);
+    motorR.start(0);
 
-    //Unmount the filesystem
-    fprintf(ofp,"End of Program\r\n");
+    while (encoderL != 0)
+        wait_ms(10);
+
+
+    /** Unmount the filesystem **/
     fclose(ofp);
-    printf("Unmounting SD card\r\n");
     sd.unmount();
-    Pc.printf("SD card unmounted\r\n");
+    fprintf(ofp,"End of Program\r\n");
 
-    Pc.printf("Program Terminated\r\n");
     while(1);
 }
  

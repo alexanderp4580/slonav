@@ -6,7 +6,7 @@ GPS::GPS(PinName tx, PinName rx) : _UltimateGps(tx, rx)
 
 int GPS::parseData()
 {
-    while(1) {
+    //while(1) {
         getData();
         sscanf(NEMA, "GPGGA, %*f, %*f, %*c, %*f, %*c, %d, %d, %*f, %f", &fixtype, &satellites, &altitude);
         if(sscanf(NEMA, "GPRMC, %2d%2d%f, %c, %f, %c, %f, %c, %f, %f, %2d%2d%2d"
@@ -86,7 +86,10 @@ int GPS::parseData()
             kph = speed*1.852;
             return 1;
         }
-    }
+        else {
+        return 0;
+        }
+   // }
 }
 
 
