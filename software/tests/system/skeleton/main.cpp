@@ -195,6 +195,7 @@ int main()
 
     /** init timing variables **/
     unsigned long time = 0;
+    unsigned long otime = 0;
     unsigned long dtime = 0;
 
 
@@ -205,111 +206,55 @@ int main()
     while (!stop) {
 
 
-
+        /* prints one data component and updates cache when done with set */
         if (printer(&cache)) {
             cache.b_time = gps.time;
             cache.b_estop = e_stop;
-            cache.b_Aheading
-    int b_time = 0;
-    int b_estop = 0;
-    float b_A_heading = 0;
-    float b_V_heading = 0;
-    float b_accel = 0;
-    float b_vel = 0;
-    int   b_encoderAv = 0;    
-    int b_waypoint = 0;
-    
-    
-    
-    
-    }
-    
-
-
-
-
-
-
-    
-
-
-
-    //main loop, breaks out if estop tripped
-	while((estop = E_Stop.pulsewidth() * 1000000) < 1150 && estop > 1090) {
-
-        //incriment variables
-        saveCount++;
-        gpsCount++;
-
-        ////////////////////////////Gather Data
-        //get radio values
-        throtle = Throt.pulsewidth();
-        mode = Mode.pulsewidth();
-        leftright = Lr.pulsewidth();
-        //Read data from IMU
-        imu.getEulerAng(&euler);
-        imu.getLinAccel(&linAccel);
-        imu.getGravity(&grav);
-        //get encoder data and reset encoders
-        lenc = EncoderL.getPulses();
-        renc = EncoderR.getPulses();
-        EncoderL.reset();
-        EncoderR.reset();
-
-        if (gpsCount > 10) {
-            //get gps data
-            lock = Gps.parseData();
-            gpsCount = 0;
+            //finish cacheing all data points
         }
 
-        //////////////////////////Use Data to make decisions
-        //Check Dip2 && radio state then set the motor variables accordingly
-		if(Btn && (mode * 1000000) > 1450 && mode < 1550) {
-            //Radio control mode
-			modeRC(throtle, leftright, &mr, &ml);
-		} else {
-            //all other states atmo are just dead stop
-			ml = 0;
-		    mr = 0;
-		}
-        if (saveCount > 20) {
-            ///////////////////////////Record data and decisions to file
-            //record map relevent data (not currently used)   
-            fprintf(ofp, "%d, %d, %d, ", pCount, 0, 0); 
-            //record radio values
-            fprintf(ofp, "%f, %f, %f, %f, ", throtle, leftright, estop, mode);
-            //record gps data if available
-            if (lock) {
-                fprintf(ofp, "%f, %f, %f, %d, ", Gps.time, Gps.latitude,
-                    Gps.longitude, Gps.satellites);
-            } else {
-                fprintf(ofp, "NL, NL, NL, NL, ");
-            }
-            //record data from IMU
-            fprintf(ofp, "%f, %f, %f, ", linAccel.x, linAccel.y, linAccel.z);
-            fprintf(ofp, "%f, %f, %f, ", euler.heading, euler.pitch, euler.roll);
-            fprintf(ofp, "%f, %f, %f, ", grav.x, grav.y, grav.z);
-            //record encoder data
-            fprintf(ofp, "%d, %d, ", lenc, renc);
-            //record motor variables
-            fprintf(ofp, "%d, %d\r\n", ml, mr); 
-            saveCount = 0;
-        }
+        /* uppdate the elapsed time in ms*/
+        time = getTime();
+        dtime = time > otime ? time - otime : time;
+        otime = time;
 
-        /////////////////////////////use decisions to change motors
-        //Set motors
-	    MotorL.start(ml);
-		MotorR.start(mr);    
+        if (time >= 5) {
+            if (e_stop = get_estop()) {
+                stop = 1;
+                break;
+           }
+           
+           if (get_radio())
+               break;
             
-        ////////////////////////////end of loop cleanup and multiloop funcs    
-        //Increment data point count    
-        pCount++;
-        gpsCount++;
-        saveCount++;
+           if (get_imu())
+                break;
 
-        //delay 10ms, this may be removed in future if we use a heavy algorithm
+           if (get_encoders())
+                break;
 
-    }
+           if (get_fusion())
+                break;
+
+           if (generate_motor_prof())
+                break;
+
+       }
+
+       if (dtime >= 10) {
+            if (get_gps())
+                break;
+       }
+
+       if (check_map()) 
+            break;
+
+       if (motor_update())
+            break;
+
+   }
+
+
 
     /** power down motors **/
     motorL.start(0);
@@ -318,12 +263,16 @@ int main()
     while (encoderL != 0)
         wait_ms(10);
 
+    /** shutdown main power system **/
+    shutdown_power();
+
 
     /** Unmount the filesystem **/
     fclose(ofp);
     sd.unmount();
     fprintf(ofp,"End of Program\r\n");
 
+    /** loop forever **/
     while(1);
 }
  
