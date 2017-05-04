@@ -1,8 +1,12 @@
 /**
- * SD Card Read/Write Test
- * 4/5/2017
+ * Final Program Skeleton
+ * 5/04/2017
+ *
+ *ToDo: functionalise and fill in
+ *      Get it compiling
  *
 **/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,6 +35,18 @@ typedef struct Buffer{
     int b_waypoint = 0;
 } Buffer;
 
+int ESTOP() { 
+    /** shutdown main power system **/
+    shutdown_power();
+
+    /** Unmount the filesystem **/
+    fprintf(ofp,"End of Program\r\n");
+    fclose(ofp);
+    sd.unmount();
+    
+    while(1) ;
+
+}
 
 int main()
 {
@@ -268,9 +284,10 @@ int main()
 
 
     /** Unmount the filesystem **/
+    fprintf(ofp,"End of Program\r\n");
     fclose(ofp);
     sd.unmount();
-    fprintf(ofp,"End of Program\r\n");
+
 
     /** loop forever **/
     while(1);
