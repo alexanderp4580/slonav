@@ -19,7 +19,7 @@
 #define KP_STEER 5.0
 #define KI_STEER 0.0
 #define KD_STEER 0.0
-#define SPEED 40.0
+#define SPEED 30.0
 #define INTERVAL 0.05
 
 int main()
@@ -50,9 +50,6 @@ int main()
     PwmIn Mode(MODE);
     PwmIn E_Stop(ESTO);
 
-    /* PID Controller */
-    PID steerPID(KP_STEER, KI_STEER, KD_STEER, INTERVAL);
-
     /* Timer */
     Timer timer;
 
@@ -81,6 +78,7 @@ int main()
 
     // Distance to travel
     int distance;
+    bool flip = 0;
 	
     //Mount the filesystem
     printf("Mounting SD card\r\n");
@@ -113,9 +111,7 @@ int main()
     Pc.printf("Drive distance set to %d\r\n", distance);
 
     // Initialize PID controller
-    steerPID.setInputLimits(0.0, 180.0);
-    steerPID.setOutputLimits(0, 100.0);
-    steerPID.setSetPoint(sp);
+    PID steerPID(&sp, &input, &output, 0.0, 100.0, KP_STEER, KI_STEER, KD_STEER, INTERVAL);
 
     //print collumn catagories
     Pc.printf("Starting run\r\n");
@@ -125,23 +121,28 @@ int main()
     fprintf(ofp, "xAcc, yAcc, zAcc, heading, ");
     fprintf(ofp, "lEncoder, rEncoder, lMotor, rMotor\r\n");
 
+    //Gather Data
+    //get radio values
+    throtle = Throt.pulsewidth();
+    mode = Mode.pulsewidth();
+    leftright = Lr.pulsewidth();
+
+    //start PID
+
+    steerPID.start();
+
     //start timer
     timer.start();
 
-    //main loop, stops when distance is reached
-	while(distance > 0) {
+    //main loop, stops when distance is reached or estop is engaged
+	while(distance > 0 && (estop = E_Stop.pulsewidth() * 1000000) < 1150 && estop > 1090) {
 
-        if(timer.read() > INTERVAL){
+        if(timer.read() > INTERVAL-0.01){
             timer.reset();
             //increment variables
             saveCount++;
             gpsCount++;
 
-            //Gather Data
-            //get radio values
-            throtle = Throt.pulsewidth();
-            mode = Mode.pulsewidth();
-            leftright = Lr.pulsewidth();
             //Read data from IMU
             imu.getEulerAng(&euler);
             imu.getLinAccel(&linAccel);
@@ -181,25 +182,33 @@ int main()
 
             distance -= (lenc + renc)/2;
             input = euler.heading;
+            flip = 0;
             if (input > 180.0) {
                 input -= 360.0;
+                flip = 1;
             }
-            steerPID.setProcessValue(input);
-            output = steerPID.compute();
+            // if (input < 0){
+            //     input = input * -1;
+            //     flip = 1;
+            // }
             Pc.printf("Input: %f\r\n", input);
+            Pc.printf("Flip: %d\r\n", flip);
             
 
             /////////////////////////////use decisions to change motors
             //Set motors
-            if (input > 0){
-                MotorL.setOutput(int(SPEED - output));
-                MotorR.setOutput(int(SPEED + output));
-            }
-            else {
+            if (flip == 0){
                 MotorL.setOutput(int(SPEED + output));
                 MotorR.setOutput(int(SPEED - output));
+                Pc.printf("MotorL Output: %d\r\n", int(SPEED + output));
+                Pc.printf("MotorR Output: %d\r\n", int(SPEED - output));
             }
-            Pc.printf("Output: %f\r\n", output);
+            else {
+                MotorL.setOutput(int(SPEED - output));
+                MotorR.setOutput(int(SPEED + output));
+                Pc.printf("MotorL Output: %d\r\n", int(SPEED - output));
+                Pc.printf("MotorR Output: %d\r\n", int(SPEED + output));
+            }
                 
             ////////////////////////////end of loop cleanup and multiloop funcs    
             //Increment data point count    
@@ -218,6 +227,10 @@ int main()
 
     //stop timer
     timer.stop();
+
+    if (timer > 0) {
+        Pc.printf("ESTOP engaged\r\n");
+    }
 
     //Unmount the filesystem
     fprintf(ofp,"End of Program\r\n");
