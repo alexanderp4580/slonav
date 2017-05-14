@@ -46,6 +46,7 @@ PROJECT := slonav
 # Objects and Paths
 
 OBJECTS += main.o
+OBJECTS += MCP4922.o
 
 OBJECTS += ../../mbed/mbed-dev/drivers/AnalogIn.o
 OBJECTS += ../../mbed/mbed-dev/drivers/BusIn.o
