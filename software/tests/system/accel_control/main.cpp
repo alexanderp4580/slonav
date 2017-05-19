@@ -1,6 +1,7 @@
 /**
  * Acceleration Test
- * 4/23/17
+ * 5/18/17
+ * Work in progress --- DO NOT FLASH!
  *
 **/
 
@@ -16,10 +17,15 @@
 #include "PwmIn.h"
 #include "PID.h"
 
-// #define KP 10.0
-// #define KI 1.5
-// #define KD 0.0
-// #define SPEED 40.0
+#define KP_A 1.0
+#define KI_A 0.0
+#define KD_A 0.0
+#define SPEED 40.0
+
+float nextAccelSP(float startVel, float endVel) {
+
+    return setpoint;
+}
 
 int main()
 {
@@ -50,7 +56,7 @@ int main()
     PwmIn E_Stop(ESTO);
 
     /* PID Controller */
-    PID steerPID(KP, KI, KD, 0.010);
+    PID accelPID(KP_A, KI_A, KD_A, 0.010);
 
     int pCount = 0;
     int saveCount = 0;
@@ -96,17 +102,10 @@ int main()
 	MotorR.start(0);
     Pc.printf("Motors initialised\r\n");
 
-    //Getting initial heading for control loop
-    imu.getEulerAng(&euler);
-    sp = euler.heading;
-    distance = 10000;
-    Pc.printf("Steering heading set\r\n");
-    Pc.printf("Drive distance set to %d\r\n", distance);
-
     // Initialize PID controller
-    steerPID.setInputLimits(0.0, 180.0);
-    steerPID.setOutputLimits(0.0, 100.0);
-    steerPID.setSetPoint(sp);
+    accelPID.setInputLimits(0.0, 180.0);
+    accelPID.setOutputLimits(0.0, 100.0);
+    accelPID.setSetPoint(sp);
 
     //print collumn catagories
     Pc.printf("Starting run\r\n");
