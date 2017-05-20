@@ -128,7 +128,6 @@ int main()
     leftright = Lr.pulsewidth();
 
     //start PID
-
     steerPID.start();
 
     //start timer
@@ -184,13 +183,9 @@ int main()
             input = euler.heading;
             flip = 0;
             if (input > 180.0) {
-                input -= 360.0;
+                input = 360.0 - input;
                 flip = 1;
             }
-            // if (input < 0){
-            //     input = input * -1;
-            //     flip = 1;
-            // }
             Pc.printf("Input: %f\r\n", input);
             Pc.printf("Flip: %d\r\n", flip);
             

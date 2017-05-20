@@ -17,12 +17,13 @@
 #include "PwmIn.h"
 #include "PID.h"
 
-#define KP_A 1.0
-#define KI_A 0.0
-#define KD_A 0.0
-#define SPEED 40.0
+#define KP_ACCEL 1.0
+#define KI_ACCEL 0.0
+#define KD_ACCEL 0.0
 
-float nextAccelSP(float startVel, float endVel) {
+float nextVelSP(float startVel, float endVel) {
+
+    
 
     return setpoint;
 }
@@ -56,7 +57,7 @@ int main()
     PwmIn E_Stop(ESTO);
 
     /* PID Controller */
-    PID accelPID(KP_A, KI_A, KD_A, 0.010);
+    PID accelPID(KP_ACCEL, KI_ACCEL, KD_ACCEL, 0.010);
 
     int pCount = 0;
     int saveCount = 0;
