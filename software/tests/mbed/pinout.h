@@ -5,16 +5,16 @@
 **/
 
 
-/* Model Motor Cape */
-const PinName IN1A = PB_4; // PWM3 output
-const PinName IN2A = PB_5; // PWM3 output
-const PinName IN1B = PA_1; // PWM2 output
-const PinName IN2B = PA_0; // PWM2 output
-const PinName ENA  = PA_10; // Digital output
-const PinName ENB  = PC_1; // Digital output
+// /* Model Motor Cape */
+// const PinName IN1A = PB_4; // PWM3 output
+// const PinName IN2A = PB_5; // PWM3 output
+// const PinName IN1B = PA_1; // PWM2 output
+// const PinName IN2B = PA_0; // PWM2 output
+// const PinName ENA  = PA_10; // Digital output
+// const PinName ENB  = PC_1; // Digital output
 
-/* Model Brake */
-const PinName BRK = PB_6; // PWM4 output 
+// /* Model Brake */
+// const PinName BRK = PB_6; // PWM4 output 
 
 /* Kelly Motor Controllers */
 const PinName MOSI2 = PB_15; // SPI2 MOSI
@@ -24,9 +24,10 @@ const PinName CSM1 = PB_1; // Digital output
 const PinName CSM2 = PB_2; // Digital output
 
 /* Final System Brake */
-const PinName BRAKE_POS = PC_5; // Analog Input
-const PinName 
-
+const PinName BRAKE_POS = PC_0; // Analog input
+const PinName RPWM = PB_4; // PWM3 output
+const PinName LPWM = PB_5; // PWM3 output
+const PinName BRAKE_EN = PH_1; // Digital output
 
 /* Encoders */
 const PinName CHA1 = PA_8; // Digital input
