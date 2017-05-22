@@ -1,6 +1,6 @@
 /**
- * Pinouts for the SLONav test vehical prototype
- * TU 5/13/2017
+ * Pinouts for the SLONav test vehicle prototype
+ * TU 5/21/2017
  *
 **/
 
@@ -22,6 +22,11 @@ const PinName MISO2 = PB_14; // SPI2 MISO
 const PinName SCLK2 = PB_13; // SPI2 clock
 const PinName CSM1 = PB_1; // Digital output
 const PinName CSM2 = PB_2; // Digital output
+
+/* Final System Brake */
+const PinName BRAKE_POS = PC_5; // Analog Input
+const PinName 
+
 
 /* Encoders */
 const PinName CHA1 = PA_8; // Digital input
