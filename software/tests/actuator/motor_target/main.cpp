@@ -29,9 +29,11 @@ int main() {
 
     while (1) {
         //Generate a sine wave on DAC A
+        printf("A\n");
         for (float a = 0.0; a < 360.0; a += 0.1){
+            printf("a = %f\n", a);
             motor1.write(throt, 0.5 * (sinf(a * 3.14159265 / 180.0) + 1));
-            wait_us(10);
+            wait_us(100);
             motor1.write(brake, 0.5 * (sinf(a * 3.14159265 / 180.0) + 1));
         }
     }

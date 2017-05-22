@@ -18,9 +18,14 @@
 #include "QEI.h"
 #include "motor.h"
 #include "PwmIn.h"
+#include "MCP4922.h"
+
 
 //Function allows driving by RC controler
-int modeRC(float throtle, float lrat, int *mr, int *ml) {
+int modeRC(float throtle, float lrat, float *mr, float *ml) {
+    
+    
+
 	throtle *= 1000000;
 	throtle -= 1100;
 	throtle /= 8;
@@ -28,8 +33,15 @@ int modeRC(float throtle, float lrat, int *mr, int *ml) {
 	lrat *= 1000000;
 	lrat -= 1000;
 	lrat /= 1000;
-	*ml = (int)((1 - lrat) * throtle);
-	*mr = (int)(lrat * throtle);
+
+    //printf("modeRC: lrat = %f, throt = %f\n", lrat, throtle);
+	*ml = ((1 - lrat) * throtle) / 100;
+	*mr = (lrat * throtle) / 100;
+
+    if (*ml < 0.01)
+        *ml = 0;
+    if (*mr < 0.01)
+        *mr = 0;
 
 	return 0;
 }
@@ -44,8 +56,8 @@ SDFileSystem sd(DI, DO, CLK, CS, "sd");
 IMU imu(I2C_SDA, I2C_SCL, BNO055_G_CHIP_ADDR, true);
 
 /* Motor Objects */
-MOTOR MotorR(1, IN2A, IN1A, ENA, true);
-MOTOR MotorL(2, IN2B, IN1B, ENB, true);
+//MOTOR MotorR(1, IN2A, IN1A, ENA, true);
+//MOTOR MotorL(2, IN2B, IN1B, ENB, true);
 
 /* Encoder Objects */
 QEI EncoderL(CHA1, CHB1, NC, 192, QEI::X4_ENCODING);
@@ -68,6 +80,8 @@ PwmIn E_Stop(ESTO);
 DigitalIn Btn(PC_0);
 DigitalIn Dip(PB_6);
 
+DigitalOut Power(PC_4);
+
 int main()
 {
     Map mp;
@@ -84,7 +98,29 @@ int main()
     float throtle, leftright, mode, estop;
 
     //motor variables
-    int mr, ml;
+    float mr, ml;
+    MCP4922 motors(MOSI2, SCLK2, CSM1, 100000);
+    MCP4922::MCPDAC motor_left, motor_righ;
+    motor_left = MCP4922::DAC_B;
+    motor_righ = MCP4922::DAC_A;
+
+    motors.referenceMode(motor_left, MCP4922::REF_UNBUFFERED);
+    motors.gainMode(motor_left, MCP4922::GAIN_1X);
+    motors.powerMode(motor_left, MCP4922::POWER_NORMAL);
+
+    motors.referenceMode(motor_righ, MCP4922::REF_UNBUFFERED);
+    motors.gainMode(motor_righ, MCP4922::GAIN_1X);
+    motors.powerMode(motor_righ, MCP4922::POWER_NORMAL);
+
+
+//    for (float a = 0.0; a < 360.0; a += 0.1) {
+//        printf("a = %f\n", a);
+//        motors.write(motor_left, 0.5 * (sinf(a * 3.1415 / 180) + 1));
+//    }
+    motors.write(motor_left, 0.0);
+    motors.write(motor_righ, 0.0);
+
+
 
     //encoder variables
     int lenc, renc;
@@ -116,31 +152,37 @@ int main()
 	}
     
     //parse map file into Map structure
-    if (readMap(ifp, &mp)) {
-        Pc.printf("Map parse failed\r\n");
-        while(1);
-    }
+    //if (readMap(ifp, &mp)) {
+    //    Pc.printf("Map parse failed\r\n");
+    //    while(1);
+   // }
 
     //review the map structure for errors
-    if (checkMap(&mp)) {
-        Pc.printf("Map does not fit rules\r\n");
-        while(1);
-    }
+    //if (checkMap(&mp)) {
+    //    Pc.printf("Map does not fit rules\r\n");
+    //    while(1);
+    //}
     //close the map file, won't be using it anymore
-    fclose(ifp);
+    //fclose(ifp);
     Pc.printf("FileSystem ready\r\n");
     
 	//Initialise motors
-	MotorL.start(0);
-	MotorR.start(0);
+	//MotorL.start(0);
+	//MotorR.start(0);
     Pc.printf("Motors initialised\r\n");
 
     Pc.printf("Waiting on user GO\r\n");
+
+    /*while (1) {
+        printf("E_Stop\tThr\tMo\tLR\n");
+        printf("%f %f %f %f\n",E_Stop.pulsewidth(), Throt.pulsewidth(), Mode.pulsewidth(), Lr.pulsewidth());
+        wait_ms(100);
+    }*/
+
     //estop must transition from low to high to activate vehical
-	while ((estop = E_Stop.pulsewidth() * 1000000) < 1150 && 
-            estop > 1090)
-        ;
-	while ((estop = E_Stop.pulsewidth() * 1000000) != 1096)
+	while ((estop = E_Stop.pulsewidth() * 1000000) > 1800)
+       ;
+	while ((estop = E_Stop.pulsewidth() * 1000000) < 1800)
         ;
     
 
@@ -151,9 +193,10 @@ int main()
     fprintf(ofp, "time, lat, long, #sat, ");
     fprintf(ofp, "xAcc, yAcc, zAcc, heading, pitch, role, xGra, yGra, zGra, ");
     fprintf(ofp, "lEncoder, rEncoder, lMotor, rMotor\r\n");
-
+    
+    Power = 1;
     //main loop, breaks out if estop tripped
-	while((estop = E_Stop.pulsewidth() * 1000000) < 1150 && estop > 1090) {
+	while((estop = E_Stop.pulsewidth() * 1000000) > 1800) {
 
         //incriment variables
         saveCount++;
@@ -182,7 +225,7 @@ int main()
 
         //////////////////////////Use Data to make decisions
         //Check Dip2 && radio state then set the motor variables accordingly
-		if(Btn && (mode * 1000000) > 1450 && mode < 1550) {
+		if((mode *= 1000000) > 1450 && mode < 1550) {
             //Radio control mode
 			modeRC(throtle, leftright, &mr, &ml);
 		} else {
@@ -216,8 +259,11 @@ int main()
 
         /////////////////////////////use decisions to change motors
         //Set motors
-	    MotorL.start(ml);
-		MotorR.start(mr);    
+	    //MotorL.start(ml);
+		//MotorR.start(mr);    
+       // printf("ml = %f, mr = %f\n",ml, mr);
+        motors.write(motor_left, ml);
+        motors.write(motor_righ, mr);
             
         ////////////////////////////end of loop cleanup and multiloop funcs    
         //Increment data point count    
@@ -230,9 +276,12 @@ int main()
     }
 
     //power down motors
-    MotorL.start(0);
-    MotorR.start(0);
-
+    //MotorL.start(0);
+    //MotorR.start(0);
+        motors.write(motor_left, 0);
+        motors.write(motor_righ, 0);
+    
+    Power = 0;
     //Unmount the filesystem
     fprintf(ofp,"End of Program\r\n");
     fclose(ofp);
