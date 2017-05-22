@@ -60,6 +60,7 @@ OBJECTS += ../sensor/gps/GPS.o
 OBJECTS += ../actuator/motor_model/motor.o
 OBJECTS += ../actuator/motor_model/QEI.o
 OBJECTS += ../sensor/radio/PwmIn.o
+OBJECTS += MCP4922.o
 
 OBJECTS += ../mbed/mbed-dev/drivers/AnalogIn.o
 OBJECTS += ../mbed/mbed-dev/drivers/BusIn.o
