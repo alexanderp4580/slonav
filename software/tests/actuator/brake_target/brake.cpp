@@ -31,12 +31,12 @@ void BRAKE::setPosition(float percent)
         percent = 0.75;
     }
 
-    if(percent < 0.03){
-        percent = 0.03;
+    if(percent < 0.17){
+        percent = 0.17;
     }
 
     if(_position.read() < percent - 0.01){
-        while(_position.read() < percent){
+        while(_position.read() < percent - 0.05){
             _retract.pulsewidth_us(0);
             _extend.pulsewidth_us(50);
         }

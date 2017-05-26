@@ -126,26 +126,26 @@ int main()
        ;
     printf("brake on user input\n");
 
-    while (1) {
-        throtle = M_Brake.pulsewidth();
-        throtle *= 1000;
-        throtle -= 1;
-        if (throtle < 0.02)
-            throtle = 0.02;
-        if (throtle > 0.86)
-            throtle = 0.86;
-        printf("Brake = %f\n",throtle);
+    // while (1) {
+    //     throtle = M_Brake.pulsewidth();
+    //     throtle *= 1000;
+    //     throtle -= 1;
+    //     if (throtle < 0.02)
+    //         throtle = 0.02;
+    //     if (throtle > 0.86)
+    //         throtle = 0.86;
+    //     printf("Brake = %f\n",throtle);
         
-        if (brake.getPosition() > throtle) {
-            brake.setRetract();
-        } else {
-            brake.setExtend();
-        }
-        while((pos = brake.getPosition()) < throtle - 0.1 || pos > throtle + 0.1)
-            printf("pos = %f\n", pos);
-        brake.setStop();
+    //     if (brake.getPosition() > throtle) {
+    //         brake.setRetract();
+    //     } else {
+    //         brake.setExtend();
+    //     }
+    //     while((pos = brake.getPosition()) < throtle - 0.1 || pos > throtle + 0.1)
+    //         printf("pos = %f\n", pos);
+    //     brake.setStop();
         
-    }
+    // }
         
 
 
@@ -188,6 +188,11 @@ int main()
     IMU::imu_lin_accel_t linAccel;
     IMU::imu_gravity_t grav;
 
+    // while (1) {
+    //     printf("E_Stop\tThr\tMo\tLR\tBRAK\r\n");
+    //     printf("%f %f %f %f %f\r\n",E_Stop.pulsewidth(), Throt.pulsewidth(), Mode.pulsewidth(), Lr.pulsewidth(),M_Brake.pulsewidth());
+    //     wait_ms(100);
+    // }
 	
     //Mount the filesystem
     printf("Mounting SD card\r\n");
@@ -228,11 +233,7 @@ int main()
 
     Pc.printf("Waiting on user GO\r\n");
 
-    /*while (1) {
-        printf("E_Stop\tThr\tMo\tLR\n");
-        printf("%f %f %f %f\n",E_Stop.pulsewidth(), Throt.pulsewidth(), Mode.pulsewidth(), Lr.pulsewidth());
-        wait_ms(100);
-    }*/
+
 
     //estop must transition from low to high to activate vehical
 	while ((estop = E_Stop.pulsewidth() * 1000000) > 1800)
@@ -278,16 +279,15 @@ int main()
             //     gpsCount = 0;
             // }
 
-            // //////////////////////////Use Data to make decisions
-            // //Check Dip2 && radio state then set the motor variables accordingly
-            // if((mode *= 1000000) > 1450 && mode < 1550) {
-            //     //Radio control mode
+            if((mode *= 1000000) > 1450 && mode < 1550) {
+                //Radio control mode
                 modeRC(throtle, leftright, &mr, &ml);
-            // } else {
-            //     //all other states atmo are just dead stop
-            //     ml = 0;
-            //     mr = 0;
-            // }
+            } else {
+                //all other states atmo are just dead stop
+                ml = 0;
+                mr = 0;
+            }
+
             if (saveCount > 19) {
                 ///////////////////////////Record data and decisions to file
                 //record map relevent data (not currently used)   
@@ -325,15 +325,10 @@ int main()
             pCount++;
             // gpsCount++;
             saveCount++;
-
-            // //delay 10ms, this may be removed in future if we use a heavy algorithm
-            // wait_ms(10);
         }
     }
 
     //power down motors
-    //MotorL.start(0);
-    //MotorR.start(0);
     motors.write(motor_left, 0);
     motors.write(motor_righ, 0);
     

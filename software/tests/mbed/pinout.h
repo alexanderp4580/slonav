@@ -44,7 +44,7 @@ const PinName GPTX = PC_10; // Serial3 TX
 const PinName GPRX = PC_11; // Serial3 RX
 
 /* radio */
-const PinName LRIN = PB_12; // Digital input (PWM input)
+const PinName LRIN = PC_8; // Digital input (PWM input)
 const PinName MODE = PB_0; // Digital input (PWM input)
 const PinName THRO = PB_3; // Digital input (PWM input)
 const PinName ESTO = PA_11; // Digital input (PWM input)
