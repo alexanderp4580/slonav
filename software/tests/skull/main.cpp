@@ -19,14 +19,15 @@
 #include "motor.h"
 #include "PwmIn.h"
 #include "MCP4922.h"
-#include "brake.h"
+
 
 //Function allows driving by RC controler
 int modeRC(float throtle, float lrat, float *mr, float *ml) {
-    
-    
+    static int oldL = 0;
+    static int oldR = 0;
 
-	throtle *= 1000000;
+
+  	throtle *= 1000000;
 	throtle -= 1100;
 	throtle /= 8;
 	
@@ -42,6 +43,13 @@ int modeRC(float throtle, float lrat, float *mr, float *ml) {
         *ml = 0;
     if (*mr < 0.01)
         *mr = 0;
+
+    if (*ml > oldL + 5 || *ml < oldL -5) {
+        *ml = *ml < oldL ? oldL - 5 : oldL + 5;
+    }
+
+    oldL = *ml;
+    oldR = *mr;
 
 	return 0;
 }
@@ -74,7 +82,6 @@ PwmIn Throt(THRO);
 PwmIn Lr(LRIN);
 PwmIn Mode(MODE);
 PwmIn E_Stop(ESTO);
-PwmIn M_Brake(BRAK);
 
 
 /* Input Buttons */
@@ -98,55 +105,6 @@ int main()
     //radio variables
     float throtle, leftright, mode, estop;
 
-    
-   BRAKE brake(RPWM,LPWM,BRAKE_EN,BRAKE_POS); 
-
-
-    float pos;
-/*
-    printf("brake to 0\n");
-    brake.setRetract();
-    while((pos = brake.getPosition()) > 0.2)
-        printf("pos = %f\n", pos);
-    brake.setStop();
-*/    
-    /*wait_ms(1000);
-    printf("brake to .75 abs max = .85\n");
-    brake.setExtend();
-    while((pos = brake.getPosition()) < 0.75)
-        printf("pos = %f\n", pos);
-    brake.setStop();
-    */
-
-	while ((estop = E_Stop.pulsewidth() * 1000000) > 1800)
-       ;
-	while ((estop = E_Stop.pulsewidth() * 1000000) < 1800)
-       ;
-    printf("brake on user input\n");
-
-    while (1) {
-        throtle = M_Brake.pulsewidth();
-        throtle *= 1000;
-        throtle -= 1;
-        if (throtle < 0.02)
-            throtle = 0.02;
-        if (throtle > 0.86)
-            throtle = 0.86;
-        printf("Brake = %f\n",throtle);
-        
-        if (brake.getPosition() > throtle) {
-            brake.setRetract();
-        } else {
-            brake.setExtend();
-        }
-        while((pos = brake.getPosition()) < throtle - 0.1 || pos > throtle + 0.1)
-            printf("pos = %f\n", pos);
-        brake.setStop();
-        
-    }
-        
-
-
     //motor variables
     float mr, ml;
     MCP4922 motors(MOSI2, SCLK2, CSM1, 100000);
@@ -161,9 +119,6 @@ int main()
     motors.referenceMode(motor_righ, MCP4922::REF_UNBUFFERED);
     motors.gainMode(motor_righ, MCP4922::GAIN_1X);
     motors.powerMode(motor_righ, MCP4922::POWER_NORMAL);
-
-
-    
 
 
 //    for (float a = 0.0; a < 360.0; a += 0.1) {
@@ -236,7 +191,7 @@ int main()
 	while ((estop = E_Stop.pulsewidth() * 1000000) > 1800)
        ;
 	while ((estop = E_Stop.pulsewidth() * 1000000) < 1800)
-       ;
+        ;
     
 
     //print collumn catagories

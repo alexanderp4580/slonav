@@ -20,8 +20,9 @@
 #include "imu.h"
 #include "GPS.h"
 #include "QEI.h"
-#include "motor.h"
 #include "PwmIn.h"
+#include "MCP4922.h"
+
 
 typedef struct Buffer{
     int b_time = 0;

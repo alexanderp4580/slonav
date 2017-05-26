@@ -39,14 +39,18 @@ void BRAKE::setPosition(float percent)
         while(_position.read() < percent){
             _retract.pulsewidth_us(0);
             _extend.pulsewidth_us(50);
+            printf("yo\n");
         }
         _extend.pulsewidth_us(0);
     }
     else {
-        while(_position.read() > percent + 0.01){
-            _retract.pulsewidth_us(50);
-            _extend.pulsewidth_us(0);
-        }
+        //if more extended the retract
+            while(_position.read() > percent + 0.01){
+                _retract.pulsewidth_us(50);
+                _extend.pulsewidth_us(0);
+                printf("posit\n %f", _position.read());
+            }
+         
         _retract.pulsewidth_us(0);
     }
 
@@ -66,7 +70,7 @@ void BRAKE::setRetract() {
 }
 float BRAKE::getPosition()
 {
-    return _position.read();
+    return 1 - _position.read();
 }
 
 //------------------------------------------------------------------------------
