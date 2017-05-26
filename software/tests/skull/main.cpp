@@ -19,14 +19,15 @@
 #include "motor.h"
 #include "PwmIn.h"
 #include "MCP4922.h"
-#include "brake.h"
 
-#define INTERVAL 0.05
 
 //Function allows driving by RC controler
 int modeRC(float throtle, float lrat, float *mr, float *ml) {
+    static int oldL = 0;
+    static int oldR = 0;
 
-	throtle *= 1000000;
+
+  	throtle *= 1000000;
 	throtle -= 1100;
 	throtle /= 8;
 	
@@ -42,6 +43,13 @@ int modeRC(float throtle, float lrat, float *mr, float *ml) {
         *ml = 0;
     if (*mr < 0.01)
         *mr = 0;
+
+    if (*ml > oldL + 5 || *ml < oldL -5) {
+        *ml = *ml < oldL ? oldL - 5 : oldL + 5;
+    }
+
+    oldL = *ml;
+    oldR = *mr;
 
 	return 0;
 }
@@ -59,9 +67,6 @@ IMU imu(I2C_SDA, I2C_SCL, BNO055_G_CHIP_ADDR, true);
 //MOTOR MotorR(1, IN2A, IN1A, ENA, true);
 //MOTOR MotorL(2, IN2B, IN1B, ENB, true);
 
-/* Timer Objects */
-Timer timer;
-
 /* Encoder Objects */
 QEI EncoderL(CHA1, CHB1, NC, 192, QEI::X4_ENCODING);
 QEI EncoderR(CHA2, CHB2, NC, 192, QEI::X4_ENCODING);
@@ -77,12 +82,12 @@ PwmIn Throt(THRO);
 PwmIn Lr(LRIN);
 PwmIn Mode(MODE);
 PwmIn E_Stop(ESTO);
-PwmIn M_Brake(BRAK);
 
 
 /* Input Buttons */
 DigitalIn Btn(PC_0);
 DigitalIn Dip(PB_6);
+
 DigitalOut Power(PC_4);
 
 int main()
@@ -100,55 +105,6 @@ int main()
     //radio variables
     float throtle, leftright, mode, estop;
 
-    
-   BRAKE brake(RPWM,LPWM,BRAKE_EN,BRAKE_POS); 
-
-
-    float pos;
-/*
-    printf("brake to 0\n");
-    brake.setRetract();
-    while((pos = brake.getPosition()) > 0.2)
-        printf("pos = %f\n", pos);
-    brake.setStop();
-*/    
-    /*wait_ms(1000);
-    printf("brake to .75 abs max = .85\n");
-    brake.setExtend();
-    while((pos = brake.getPosition()) < 0.75)
-        printf("pos = %f\n", pos);
-    brake.setStop();
-    */
-
-	while ((estop = E_Stop.pulsewidth() * 1000000) > 1800)
-       ;
-	while ((estop = E_Stop.pulsewidth() * 1000000) < 1800)
-       ;
-    printf("brake on user input\n");
-
-    while (1) {
-        throtle = M_Brake.pulsewidth();
-        throtle *= 1000;
-        throtle -= 1;
-        if (throtle < 0.02)
-            throtle = 0.02;
-        if (throtle > 0.86)
-            throtle = 0.86;
-        printf("Brake = %f\n",throtle);
-        
-        if (brake.getPosition() > throtle) {
-            brake.setRetract();
-        } else {
-            brake.setExtend();
-        }
-        while((pos = brake.getPosition()) < throtle - 0.1 || pos > throtle + 0.1)
-            printf("pos = %f\n", pos);
-        brake.setStop();
-        
-    }
-        
-
-
     //motor variables
     float mr, ml;
     MCP4922 motors(MOSI2, SCLK2, CSM1, 100000);
@@ -163,9 +119,6 @@ int main()
     motors.referenceMode(motor_righ, MCP4922::REF_UNBUFFERED);
     motors.gainMode(motor_righ, MCP4922::GAIN_1X);
     motors.powerMode(motor_righ, MCP4922::POWER_NORMAL);
-
-
-    
 
 
 //    for (float a = 0.0; a < 360.0; a += 0.1) {
@@ -238,7 +191,7 @@ int main()
 	while ((estop = E_Stop.pulsewidth() * 1000000) > 1800)
        ;
 	while ((estop = E_Stop.pulsewidth() * 1000000) < 1800)
-       ;
+        ;
     
 
     //print collumn catagories
@@ -250,95 +203,93 @@ int main()
     fprintf(ofp, "lEncoder, rEncoder, lMotor, rMotor\r\n");
     
     Power = 1;
-    timer.start();
     //main loop, breaks out if estop tripped
 	while((estop = E_Stop.pulsewidth() * 1000000) > 1800) {
 
-        if (timer.read() > INTERVAL) {
-            timer.reset();
+        //incriment variables
+        saveCount++;
+        gpsCount++;
 
-            ////////////////////////////Gather Data
-            //get radio values
-            throtle = Throt.pulsewidth();
-            mode = Mode.pulsewidth();
-            leftright = Lr.pulsewidth();
-            //Read data from IMU
-            imu.getEulerAng(&euler);
-            imu.getLinAccel(&linAccel);
-            imu.getGravity(&grav);
-            //get encoder data and reset encoders
-            lenc = EncoderL.getPulses();
-            renc = EncoderR.getPulses();
-            EncoderL.reset();
-            EncoderR.reset();
+        ////////////////////////////Gather Data
+        //get radio values
+        throtle = Throt.pulsewidth();
+        mode = Mode.pulsewidth();
+        leftright = Lr.pulsewidth();
+        //Read data from IMU
+        imu.getEulerAng(&euler);
+        imu.getLinAccel(&linAccel);
+        imu.getGravity(&grav);
+        //get encoder data and reset encoders
+        lenc = EncoderL.getPulses();
+        renc = EncoderR.getPulses();
+        EncoderL.reset();
+        EncoderR.reset();
 
-            // if (gpsCount > 2) {
-            //     //get gps data
-            //     lock = Gps.parseData();
-            //     gpsCount = 0;
-            // }
-
-            // //////////////////////////Use Data to make decisions
-            // //Check Dip2 && radio state then set the motor variables accordingly
-            // if((mode *= 1000000) > 1450 && mode < 1550) {
-            //     //Radio control mode
-                modeRC(throtle, leftright, &mr, &ml);
-            // } else {
-            //     //all other states atmo are just dead stop
-            //     ml = 0;
-            //     mr = 0;
-            // }
-            if (saveCount > 19) {
-                ///////////////////////////Record data and decisions to file
-                //record map relevent data (not currently used)   
-                fprintf(ofp, "%d, %d, %d, ", pCount, 0, 0); 
-                //record radio values
-                fprintf(ofp, "%f, %f, %f, %f, ", throtle, leftright, estop, mode);
-                //record gps data if available
-                if (lock) {
-                    fprintf(ofp, "%f, %f, %f, %d, ", Gps.time, Gps.latitude,
-                        Gps.longitude, Gps.satellites);
-                } else {
-                    fprintf(ofp, "NL, NL, NL, NL, ");
-                }
-                //record data from IMU
-                fprintf(ofp, "%f, %f, %f, ", linAccel.x, linAccel.y, linAccel.z);
-                fprintf(ofp, "%f, %f, %f, ", euler.heading, euler.pitch, euler.roll);
-                fprintf(ofp, "%f, %f, %f, ", grav.x, grav.y, grav.z);
-                //record encoder data
-                fprintf(ofp, "%d, %d, ", lenc, renc);
-                //record motor variables
-                fprintf(ofp, "%d, %d\r\n", ml, mr); 
-                saveCount = 0;
-            }
-
-            /////////////////////////////use decisions to change motors
-            //Set motors
-            //MotorL.start(ml);
-            //MotorR.start(mr);    
-        // printf("ml = %f, mr = %f\n",ml, mr);
-            motors.write(motor_left, ml);
-            motors.write(motor_righ, mr);
-                
-            ////////////////////////////end of loop cleanup and multiloop funcs    
-            //Increment data point count    
-            pCount++;
-            // gpsCount++;
-            saveCount++;
-
-            // //delay 10ms, this may be removed in future if we use a heavy algorithm
-            // wait_ms(10);
+        if (gpsCount > 10) {
+            //get gps data
+            lock = Gps.parseData();
+            gpsCount = 0;
         }
+
+        //////////////////////////Use Data to make decisions
+        //Check Dip2 && radio state then set the motor variables accordingly
+		if((mode *= 1000000) > 1450 && mode < 1550) {
+            //Radio control mode
+			modeRC(throtle, leftright, &mr, &ml);
+		} else {
+            //all other states atmo are just dead stop
+			ml = 0;
+		    mr = 0;
+		}
+        if (saveCount > 20) {
+            ///////////////////////////Record data and decisions to file
+            //record map relevent data (not currently used)   
+            fprintf(ofp, "%d, %d, %d, ", pCount, 0, 0); 
+            //record radio values
+            fprintf(ofp, "%f, %f, %f, %f, ", throtle, leftright, estop, mode);
+            //record gps data if available
+            if (lock) {
+                fprintf(ofp, "%f, %f, %f, %d, ", Gps.time, Gps.latitude,
+                    Gps.longitude, Gps.satellites);
+            } else {
+                fprintf(ofp, "NL, NL, NL, NL, ");
+            }
+            //record data from IMU
+            fprintf(ofp, "%f, %f, %f, ", linAccel.x, linAccel.y, linAccel.z);
+            fprintf(ofp, "%f, %f, %f, ", euler.heading, euler.pitch, euler.roll);
+            fprintf(ofp, "%f, %f, %f, ", grav.x, grav.y, grav.z);
+            //record encoder data
+            fprintf(ofp, "%d, %d, ", lenc, renc);
+            //record motor variables
+            fprintf(ofp, "%d, %d\r\n", ml, mr); 
+            saveCount = 0;
+        }
+
+        /////////////////////////////use decisions to change motors
+        //Set motors
+	    //MotorL.start(ml);
+		//MotorR.start(mr);    
+       // printf("ml = %f, mr = %f\n",ml, mr);
+        motors.write(motor_left, ml);
+        motors.write(motor_righ, mr);
+            
+        ////////////////////////////end of loop cleanup and multiloop funcs    
+        //Increment data point count    
+        pCount++;
+        gpsCount++;
+        saveCount++;
+
+        //delay 10ms, this may be removed in future if we use a heavy algorithm
+        wait_ms(10);
     }
 
     //power down motors
     //MotorL.start(0);
     //MotorR.start(0);
-    motors.write(motor_left, 0);
-    motors.write(motor_righ, 0);
+        motors.write(motor_left, 0);
+        motors.write(motor_righ, 0);
     
     Power = 0;
-    timer.stop();
     //Unmount the filesystem
     fprintf(ofp,"End of Program\r\n");
     fclose(ofp);
