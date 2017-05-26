@@ -1,7 +1,7 @@
 #include "GPS.h"
 GPS::GPS(PinName tx, PinName rx) : _UltimateGps(tx, rx)
 {
-    _UltimateGps.baud(9600);
+    _UltimateGps.baud(57600);
 }
 
 int GPS::parseData()
