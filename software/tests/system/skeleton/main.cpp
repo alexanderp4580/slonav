@@ -22,7 +22,7 @@
 #include "PwmIn.h"
 #include "MCP4922.h"
 #include "brake.h"
-#include "stop.h"
+// #include "stop.h"
 
 // Main loop period
 #define INTERVAL 0.025
@@ -48,24 +48,24 @@
 /******************************/
 /** Data Retriving Functions **/
 
-// Retreives encoder readings and converts them to ft/s
-void sc_encoders(QEI &encoderL, QEI &encoderR, float *encReading) {
-    encReading[0] = encoderL.getPulses();
-    encReading[1] = encoderR.getPulses();
-    encReading[2] = (encReading[0] + encReading[1])/2;
-    encoderL.reset();
-    encoderR.reset();
+// // Retreives encoder readings and converts them to ft/s
+// void sc_encoders(QEI &encoderL, QEI &encoderR, float *encReading) {
+//     encReading[0] = encoderL.getPulses();
+//     encReading[1] = encoderR.getPulses();
+//     encReading[2] = (encReading[0] + encReading[1])/2;
+//     encoderL.reset();
+//     encoderR.reset();
 
-    for (int i = 0; i < 3; i += 1){
-        encReading[i] = ((encReading[i]/ENC_PPR)*GEAR_RATIO*WHEEL_SIZE)/INTERVAL;
-    }
-}
+//     for (int i = 0; i < 3; i += 1){
+//         encReading[i] = ((encReading[i]/ENC_PPR)*GEAR_RATIO*WHEEL_SIZE)/INTERVAL;
+//     }
+// }
 
-void sc_imu(IMU &imu, IMU::imu_euler_t *euler, IMU::imu_lin_accel_t *linAccel){
-    imu.getEulerAng(euler);
-    imu.getLinAccel(linAccel);
-    return;
-}
+// void sc_imu(IMU &imu, IMU::imu_euler_t *euler, IMU::imu_lin_accel_t *linAccel){
+//     imu.getEulerAng(euler);
+//     imu.getLinAccel(linAccel);
+//     return;
+// }
 
 /************************/
 /** Actuator Functions **/
@@ -112,7 +112,7 @@ int modeRC(float throtle, float lrat, float brake, float *mr, float *ml, float *
 	
 	lrat *= 1000000;
 	lrat -= 1000;
-	lrat /= 1000;
+	lrat /= 5000;
 
     brake *= 1000000;
     brake -= 1500;
@@ -122,8 +122,8 @@ int modeRC(float throtle, float lrat, float brake, float *mr, float *ml, float *
         brake *= -1;
     }
 
-	*ml = ((1 - lrat) * throtle) / 100;
-	*mr = (lrat * throtle) / 100;
+	*ml = (throtle) / 100;
+	*mr = (throtle) / 100;
     *bA = brake;
 
     if (*ml < 0.01)
@@ -137,28 +137,28 @@ int modeRC(float throtle, float lrat, float brake, float *mr, float *ml, float *
 
 int main()
 {
-    /* Test Objects */
-    Serial Pc(USBTX,USBRX);
-    Pc.printf("Started program\r\n");
-    /* file system objects */
-    SDFileSystem sd(DI, DO, CLK, CS, "sd");
+    // /* Test Objects */
+    // Serial Pc(USBTX,USBRX);
+    // // Pc.printf("Started program\r\n");
+    // // /* file system objects */
+    // // SDFileSystem sd(DI, DO, CLK, CS, "sd");
 
-    /* IMU objects */
-    IMU imu(I2C_SDA, I2C_SCL, BNO055_G_CHIP_ADDR);
+    // // /* IMU objects */
+    // // IMU imu(I2C_SDA, I2C_SCL, BNO055_G_CHIP_ADDR);
 
-    /* Timer Objects */
-    Timer timer;
+    // /* Timer Objects */
+    // Timer timer;
 
-    /* Encoder Objects */
-    QEI EncoderL(CHA1, CHB1, NC, 2048, QEI::X4_ENCODING);
-    QEI EncoderR(CHA2, CHB2, NC, 2048, QEI::X4_ENCODING);
-    float encReading[3];
+    // /* Encoder Objects */
+    // QEI EncoderL(CHA1, CHB1, NC, 2048, QEI::X4_ENCODING);
+    // QEI EncoderR(CHA2, CHB2, NC, 2048, QEI::X4_ENCODING);
+    // float encReading[3];
 
-    /* IMU Objects */
-    IMU Imu(IMDA, IMCL, BNO055_G_CHIP_ADDR);
+    // /* IMU Objects */
+    // IMU Imu(IMDA, IMCL, BNO055_G_CHIP_ADDR);
 
-    /* GPS Objects */
-    GPS Gps(GPTX, GPRX);
+    // /* GPS Objects */
+    // GPS Gps(GPTX, GPRX);
 
     /* Radio Objects */
     PwmIn Throt(THRO);
@@ -169,15 +169,16 @@ int main()
 
     // Main contactor
     DigitalOut Power(PC_4);
+    Power = 0;
 
-    Map mp;
-    mp.nw.init = 0;
-    mp.ne.init = 0;
-    mp.sw.init = 0;
-    mp.se.init = 0;
+    // Map mp;
+    // mp.nw.init = 0;
+    // mp.ne.init = 0;
+    // mp.sw.init = 0;
+    // mp.se.init = 0;
 
-    float pCount = 0;
-    int saveCount = 0;
+    // float pCount = 0;
+    // int saveCount = 0;
 
     //radio variables
     float throtle, leftright, mode, estop, brake;
@@ -209,55 +210,57 @@ int main()
     // int lenc, renc;
 
     //gps variables
-    int lock = 0;
+    // int lock = 0;
 
-    // Creates variables of reading data types
-    IMU::imu_euler_t euler;
-    IMU::imu_lin_accel_t linAccel;
+    // // Creates variables of reading data types
+    // IMU::imu_euler_t euler;
+    // IMU::imu_lin_accel_t linAccel;
 	
     //Mount the filesystem
-    Pc.printf("Mounting SD card\r\n");
-    sd.mount();
-    FILE *ofp = fopen("/sd/data.txt", "w");	
-    FILE *ifp = fopen("/sd/map.mp", "r");
+    // Pc.printf("Mounting SD card\r\n");
+    // sd.mount();
+    // FILE *ofp = fopen("/sd/data.txt", "w");	
+    // FILE *ifp = fopen("/sd/map.mp", "r");
     
-	//infinite loop if SD card not found
-	if (ofp == NULL) {
-		Pc.printf("SD card not found\r\n");
-		while(1) ;
-	}	
-    //open map file
-	if (ifp == NULL) {
-		Pc.printf("No Map File Found! ABORT!\r\n");
-		while(1) ;
-	}
+	// //infinite loop if SD card not found
+	// if (ofp == NULL) {
+	// 	Pc.printf("SD card not found\r\n");
+	// 	while(1) ;
+	// }	
+    // //open map file
+	// if (ifp == NULL) {
+	// 	Pc.printf("No Map File Found! ABORT!\r\n");
+	// 	while(1) ;
+	// }
     
-    Pc.printf("FileSystem ready\r\n");
+    // Pc.printf("FileSystem ready\r\n");
     
-    Pc.printf("Waiting on user GO\r\n"); 
+    // Pc.printf("Waiting on user GO\r\n"); 
     
     while ((estop = E_Stop.pulsewidth() * 1000000) > 1800)
        ;
+    // Pc.printf("While one good");
 	while ((estop = E_Stop.pulsewidth() * 1000000) < 1800)
-       ;   
+       ;
+    // Pc.printf("While two good");
     
     brakeAct.setPosition(0.0);
 
-    //print collumn catagories
-    Pc.printf("User GO accepted starting run\r\n");
-    fprintf(ofp, "Point#, nearest waypoint, next waypoint, ");
-    fprintf(ofp, "rcThrot, rcDir, rcE-stop, rcMode, ");
-    fprintf(ofp, "time, lat, long, #sat, ");
-    fprintf(ofp, "xAcc, yAcc, zAcc, heading, pitch, roll, ");
-    fprintf(ofp, "lEncoder, rEncoder, lMotor, rMotor\r\n");
+    // //print collumn catagories
+    // Pc.printf("User GO accepted starting run\r\n");
+    // fprintf(ofp, "Point#, nearest waypoint, next waypoint, ");
+    // fprintf(ofp, "rcThrot, rcDir, rcE-stop, rcMode, ");
+    // fprintf(ofp, "time, lat, long, #sat, ");
+    // fprintf(ofp, "xAcc, yAcc, zAcc, heading, pitch, roll, ");
+    // fprintf(ofp, "lEncoder, rEncoder, lMotor, rMotor\r\n");
     
     Power = 1;
-    timer.start();
+    // timer.start();
     //main loop, breaks out if estop tripped
 	while((estop = E_Stop.pulsewidth() * 1000000) > 1800) {
 
-        if (timer.read() > INTERVAL) {
-            timer.reset();
+        // if (timer.read() > INTERVAL) {
+        //     timer.reset();
 
             ////////////////////////////Gather Data
             //get radio values
@@ -266,10 +269,10 @@ int main()
             leftright = Lr.pulsewidth();
             brake = Brake.pulsewidth();
             //Read data from IMU
-            imu.getEulerAng(&euler);
-            imu.getLinAccel(&linAccel);
-            //get encoder data and reset encoders
-            sc_encoders(EncoderL, EncoderR, encReading);
+            // imu.getEulerAng(&euler);
+            // imu.getLinAccel(&linAccel);
+            // //get encoder data and reset encoders
+            // sc_encoders(EncoderL, EncoderR, encReading);
             // lenc = EncoderL.getPulses();
             // renc = EncoderR.getPulses();
             // EncoderL.reset();
@@ -277,38 +280,52 @@ int main()
 
             modeRC(throtle, leftright, brake, &mr, &ml, &bA);
 
-            if (saveCount > 19) {
-                ///////////////////////////Record data and decisions to file
-                //record map relevent data (not currently used)   
-                fprintf(ofp, "%d, %d, %d, ", pCount*INTERVAL, 0, 0); 
-                //record radio values
-                fprintf(ofp, "%f, %f, %f, %f, ", throtle, leftright, estop, mode);
-                //record gps data if available
-                if (lock) {
-                    fprintf(ofp, "%f, %f, %f, %d, ", Gps.time, Gps.latitude,
-                        Gps.longitude, Gps.satellites);
-                } else {
-                    fprintf(ofp, "NL, NL, NL, NL, ");
-                }
-                //record data from IMU
-                fprintf(ofp, "%f, %f, %f, ", linAccel.x, linAccel.y, linAccel.z);
-                fprintf(ofp, "%f, %f, %f, ", euler.heading, euler.pitch, euler.roll);
-                //record encoder data
-                fprintf(ofp, "%d, %d, ", encReading[0], encReading[1]);
-                //record motor variables
-                fprintf(ofp, "%d, %d\r\n", ml, mr); 
-                saveCount = 0;
-            }
+            // if (saveCount > 19) {
+            //     ///////////////////////////Record data and decisions to file
+            //     //record map relevent data (not currently used)   
+            //     fprintf(ofp, "%d, %d, %d, ", pCount*INTERVAL, 0, 0); 
+            //     //record radio values
+            //     fprintf(ofp, "%f, %f, %f, %f, ", throtle, leftright, estop, mode);
+            //     //record gps data if available
+            //     if (lock) {
+            //         fprintf(ofp, "%f, %f, %f, %d, ", Gps.time, Gps.latitude,
+            //             Gps.longitude, Gps.satellites);
+            //     } else {
+            //         fprintf(ofp, "NL, NL, NL, NL, ");
+            //     }
+            //     //record data from IMU
+            //     fprintf(ofp, "%f, %f, %f, ", linAccel.x, linAccel.y, linAccel.z);
+            //     fprintf(ofp, "%f, %f, %f, ", euler.heading, euler.pitch, euler.roll);
+            //     //record encoder data
+            //     fprintf(ofp, "%d, %d, ", encReading[0], encReading[1]);
+            //     //record motor variables
+            //     fprintf(ofp, "%d, %d\r\n", ml, mr); 
+            //     saveCount = 0;
+            // }
 
             motors.write(motor_left, ml);
             motors.write(motor_righ, mr);
-            brakeAct.setPosition(bA);
+            // if (bA > 0.82) {
+            //     bA = 0.82;
+            // }
+            // if (bA < 0.16) {
+            //     bA = 0.16;
+            // }
+            // if (bA < brakeAct.getPosition()){
+            //     brakeAct.setRetract();
+            // } else {
+            //     if(bA > brakeAct.getPosition()){
+            //         brakeAct.setExtend();
+            //     }
+            //     brakeAct.setStop();
+            // }
+           /////// //brakeAct.setPosition(bA);
                 
-            ////////////////////////////end of loop cleanup and multiloop funcs    
-            //Increment data point count    
-            pCount++;
-            saveCount++;
-        }
+            // ////////////////////////////end of loop cleanup and multiloop funcs    
+            // //Increment data point count    
+            // pCount++;
+            // saveCount++;
+        // }
     }
 
     //power down motors
@@ -317,15 +334,16 @@ int main()
     brakeAct.setPosition(0.8);
     
     Power = 0;
-    timer.stop();
-    //Unmount the filesystem
-    fprintf(ofp,"End of Program\r\n");
-    fclose(ofp);
-    Pc.printf("Unmounting SD card\r\n");
-    sd.unmount();
-    Pc.printf("SD card unmounted\r\n");
+    wait_ms(20);
+    // timer.stop();
+    // //Unmount the filesystem
+    // fprintf(ofp,"End of Program\r\n");
+    // fclose(ofp);
+    // Pc.printf("Unmounting SD card\r\n");
+    // sd.unmount();
+    // Pc.printf("SD card unmounted\r\n");
 
-    Pc.printf("Program Terminated\r\n");
+    // Pc.printf("Program Terminated\r\n");
     while(1);
 }
  
