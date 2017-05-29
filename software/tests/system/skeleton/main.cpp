@@ -8,10 +8,6 @@
  *
 **/
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
 #include "mbed.h"
 #include "pinout.h"
 #include "SDFileSystem.h"
@@ -22,13 +18,12 @@
 #include "PwmIn.h"
 #include "MCP4922.h"
 #include "brake.h"
-// #include "stop.h"
 
 // Main loop period
 #define INTERVAL 0.025
-#define ENC_PPR 2048
-#define GEAR_RATIO 0.244444
-#define WHEEL_SIZE 0.833333
+// #define ENC_PPR 2048
+// #define GEAR_RATIO 0.244444
+// #define WHEEL_SIZE 0.833333
 
 // /*********************/
 // /** Data Structures **/
@@ -138,16 +133,16 @@ int modeRC(float throtle, float lrat, float brake, float *mr, float *ml, float *
 int main()
 {
     // /* Test Objects */
-    // Serial Pc(USBTX,USBRX);
-    // // Pc.printf("Started program\r\n");
+    Serial Pc(USBTX,USBRX);
+    Pc.printf("Started program\r\n");
     // // /* file system objects */
     // // SDFileSystem sd(DI, DO, CLK, CS, "sd");
 
     // // /* IMU objects */
     // // IMU imu(I2C_SDA, I2C_SCL, BNO055_G_CHIP_ADDR);
 
-    // /* Timer Objects */
-    // Timer timer;
+    /* Timer Objects */
+    Timer timer;
 
     // /* Encoder Objects */
     // QEI EncoderL(CHA1, CHB1, NC, 2048, QEI::X4_ENCODING);
@@ -182,6 +177,7 @@ int main()
 
     //radio variables
     float throtle, leftright, mode, estop, brake;
+    throtle = 0.0; leftright = 0.0; mode = 0.0; estop = 0.0; brake = 0.0;
 
     //motor variables
     float mr, ml;
@@ -202,9 +198,14 @@ int main()
     motors.write(motor_righ, 0.0);
 
     // Brake variables
-    float bA;
+    float bA, brakePos;
+    bA = 0.0; brakePos = 0.0;
     BRAKE brakeAct(LPWM,RPWM,BRAKE_EN,BRAKE_POS);
     brakeAct.setPosition(0.8);
+
+    // Most important variable
+    int stop = 0;
+    int stopCount = 0;
 
     //encoder variables
     // int lenc, renc;
@@ -237,14 +238,39 @@ int main()
     
     // Pc.printf("Waiting on user GO\r\n"); 
     
-    while ((estop = E_Stop.pulsewidth() * 1000000) > 1800)
-       ;
-    // Pc.printf("While one good");
-	while ((estop = E_Stop.pulsewidth() * 1000000) < 1800)
-       ;
-    // Pc.printf("While two good");
+    while (!stop){
+        estop = E_Stop.pulsewidth();
+        if ((estop * 1000000) > 1800 && stopCount < 3){
+            stopCount++;
+        }
+        else if ((estop * 1000000) > 1800 && stopCount >= 3) {
+            stop = 1;
+            stopCount = 0;
+        }
+        else {
+            stopCount = 0;
+        }
+    }
+
     
-    brakeAct.setPosition(0.0);
+
+	while (stop){
+        estop = E_Stop.pulsewidth();
+        if ((estop * 1000000) < 1800 && stopCount < 3){
+            stopCount++;
+        }
+        else if ((estop * 1000000) < 1800 && stopCount >= 3) {
+            stop = 0;
+            stopCount = 0;
+            brakeAct.setPosition(0.0);
+            Pc.printf("E-Stop disengaged, moving to radio control mode\r\n");
+        }
+        else {
+            stopCount = 0;
+        }
+    }
+
+    
 
     // //print collumn catagories
     // Pc.printf("User GO accepted starting run\r\n");
@@ -255,12 +281,12 @@ int main()
     // fprintf(ofp, "lEncoder, rEncoder, lMotor, rMotor\r\n");
     
     Power = 1;
-    // timer.start();
+    timer.start();
     //main loop, breaks out if estop tripped
-	while((estop = E_Stop.pulsewidth() * 1000000) > 1800) {
+	while(!stop) {
 
-        // if (timer.read() > INTERVAL) {
-        //     timer.reset();
+        if (timer.read() > INTERVAL) {
+            timer.reset();
 
             ////////////////////////////Gather Data
             //get radio values
@@ -268,6 +294,8 @@ int main()
             mode = Mode.pulsewidth();
             leftright = Lr.pulsewidth();
             brake = Brake.pulsewidth();
+            estop = E_Stop.pulsewidth();
+            // Pc.printf("E-Stop Value = %f\r\n", estop);
             //Read data from IMU
             // imu.getEulerAng(&euler);
             // imu.getLinAccel(&linAccel);
@@ -305,37 +333,52 @@ int main()
 
             motors.write(motor_left, ml);
             motors.write(motor_righ, mr);
-            // if (bA > 0.82) {
-            //     bA = 0.82;
-            // }
-            // if (bA < 0.16) {
-            //     bA = 0.16;
-            // }
-            // if (bA < brakeAct.getPosition()){
-            //     brakeAct.setRetract();
-            // } else {
-            //     if(bA > brakeAct.getPosition()){
-            //         brakeAct.setExtend();
-            //     }
-            //     brakeAct.setStop();
-            // }
-           /////// //brakeAct.setPosition(bA);
+            if (bA > 0.82) {
+                bA = 0.82;
+            }
+            if (bA < 0.16) {
+                bA = 0.16;
+            }
+
+            brakePos = brakeAct.getPosition();
+            if (bA < brakePos - 0.05){
+                brakeAct.setRetract();
+            } else if(bA > brakePos + 0.05){
+                brakeAct.setExtend();
+            }
+            else {
+                brakeAct.setStop();
+            }
                 
             // ////////////////////////////end of loop cleanup and multiloop funcs    
             // //Increment data point count    
             // pCount++;
             // saveCount++;
-        // }
+
+            if ((estop * 1000000) > 1800 && stopCount < 3){
+                stopCount++;
+            }
+            else if ((estop * 1000000) > 1800 && stopCount >= 3) {
+                stop = 1;
+                stopCount = 0;
+                Pc.printf("E-Stop engaged\r\n");
+            }
+            else {
+                stopCount = 0;
+            }
+        }
+
     }
+
 
     //power down motors
     motors.write(motor_left, 0);
     motors.write(motor_righ, 0);
     brakeAct.setPosition(0.8);
+    Pc.printf("Program exiting\r\n");
     
     Power = 0;
-    wait_ms(20);
-    // timer.stop();
+    timer.stop();
     // //Unmount the filesystem
     // fprintf(ofp,"End of Program\r\n");
     // fclose(ofp);

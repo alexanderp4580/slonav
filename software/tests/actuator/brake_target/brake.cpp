@@ -27,8 +27,8 @@ BRAKE::BRAKE(PinName extend, PinName retract, PinName enable, PinName position):
 void BRAKE::setPosition(float percent)
 {
 
-    if(percent > 0.75){
-        percent = 0.75;
+    if(percent > 0.80){
+        percent = 0.80;
     }
 
     if(percent < 0.17){

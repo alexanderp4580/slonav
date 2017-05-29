@@ -4,6 +4,18 @@
  *
 **/
 
+
+// /* Model Motor Cape */
+// const PinName IN1A = PB_4; // PWM3 output
+// const PinName IN2A = PB_5; // PWM3 output
+// const PinName IN1B = PA_1; // PWM2 output
+// const PinName IN2B = PA_0; // PWM2 output
+// const PinName ENA  = PA_10; // Digital output
+// const PinName ENB  = PC_1; // Digital output
+
+// /* Model Brake */
+// const PinName BRK = PB_6; // PWM4 output 
+
 /* Kelly Motor Controllers */
 const PinName MOSI2 = PB_15; // SPI2 MOSI
 const PinName MISO2 = PB_14; // SPI2 MISO
@@ -37,7 +49,6 @@ const PinName MODE = PB_0; // Digital input (PWM input)
 const PinName THRO = PB_3; // Digital input (PWM input)
 const PinName ESTO = PA_11; // Digital input (PWM input)
 const PinName BRAK = PA_12; // Digital input (PWM input)
-
 /* SD */
 const PinName CLK = PA_5; // SPI1 Clock
 const PinName DO = PA_6; // SPI1 MISO
