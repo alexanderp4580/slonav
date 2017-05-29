@@ -47,6 +47,7 @@ PROJECT := slonav
 
 OBJECTS += main.o
 OBJECTS += PID.o
+OBJECTS += Adafruit_GPS.o
 OBJECTS += ../../data/SDFileSystem/SDFileSystem.o
 OBJECTS += ../../data/SDFileSystem/SDCRC.o
 OBJECTS += ../../data/SDFileSystem/FATFileSystem/FATDirHandle.o

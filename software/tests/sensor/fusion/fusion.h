@@ -7,8 +7,8 @@
 #define FUSION_H
 
 // These must be defined before including TinyEKF.h
-#define Nsta 5     // Seven state values: X, Y, Vel, Accel, Heading
-#define Mobs 6     // Seven measurements: IMU - X_accel, Y_accel, Heading
+#define Nsta 5     // Five state values: X, Y, Vel, Accel, Heading
+#define Mobs 6     // Six measurements: IMU - X_accel, Y_accel, Heading
                    //                     GPS - X, Y
                    //                     Encoders - Vel
 

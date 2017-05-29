@@ -20,6 +20,7 @@
 #define KP_ACCEL 1.0
 #define KI_ACCEL 0.0
 #define KD_ACCEL 0.0
+#define ACCEL_INTERVAL 0.028
 
 float nextVelSP(float startVel, float endVel) {
 

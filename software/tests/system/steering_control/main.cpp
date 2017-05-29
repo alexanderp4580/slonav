@@ -10,7 +10,7 @@
 #include "SDFileSystem.h"
 
 #include "imu.h"
-#include "GPS.h"
+#include "Adafruit_GPS.h"
 #include "motor.h"
 #include "QEI.h"
 #include "PID.h"
@@ -22,16 +22,6 @@
 #define STEER_INTERVAL 0.028
 #define DISTANCE 10000
 
-// typedef struct Buffer{
-//     int b_time = 0;
-//     float b_break = 0;
-//     float b_A_heading = 0;
-//     float b_V_heading = 0;
-//     float b_accel = 0;
-//     float b_vel = 0;
-//     int   b_encoderAv = 0;    
-//     int b_waypoint = 0;
-// } Buffer;
 
 int main()
 {
@@ -43,9 +33,11 @@ int main()
 
     // Sensor objects
     IMU imu(IMDA, IMCL, BNO055_G_CHIP_ADDR);
-    GPS Gps(GPTX, GPRX);
+    Serial gpsSer(GPTX, GPRX, 57600);
+    Adafruit_GPS Gps(&gpsSer);
     QEI EncoderL(CHA1_MOD, CHB1_MOD, NC, 192, QEI::X4_ENCODING);
     QEI EncoderR(CHA2_MOD, CHB2_MOD, NC, 192, QEI::X4_ENCODING);
+    DigitalIn button(USER_BUTTON);
 
     // Motor objects
     MOTOR MotorR(1, IN2A, IN1A, ENA);
@@ -58,6 +50,7 @@ int main()
     int pCount = 0;
     int saveCount = 0;
     int gpsCount = 0;
+    float tElapsed = 0.0;
 
     // Sensor variables
     int lenc, renc;
@@ -79,14 +72,20 @@ int main()
     int distance = DISTANCE;
 	
     // Mount the filesystem
-    // printf("Mounting SD card\r\n");
-    // sd.mount();
-    // FILE *ofp = fopen("/sd/data.txt", "w");	
-	// if (ofp == NULL) {
-	// 	Pc.printf("SD card not found\r\n");
-	// 	while(1) ;
-	// }	
-    // Pc.printf("FileSystem ready\r\n");
+    printf("Mounting SD card\r\n");
+    sd.mount();
+    FILE *ofp = fopen("/sd/data.txt", "w");	
+	if (ofp == NULL) {
+		Pc.printf("SD card not found\r\n");
+		while(1) ;
+	}	
+    Pc.printf("FileSystem ready\r\n");
+
+    // Start GPS
+    Gps.begin(57600);
+    Gps.sendCommand(PMTK_SET_BAUD_57600);
+    Gps.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCONLY);
+    Gps.sendCommand(PMTK_SET_NMEA_UPDATE_10HZ);
     
 	//Initialize motors
 	MotorL.start(0);
@@ -99,7 +98,7 @@ int main()
     for (int i = 0; i < 5; i++) {
         imu.getEulerAng(&euler);
         steerSp += euler.heading;
-        wait_ms(10);
+        wait_ms(20);
     }
     steerSp /= 5;
     Pc.printf("Steering heading set to %f\r\n", steerSp);
@@ -108,12 +107,18 @@ int main()
     // Initialize PID controller
     PID steerPID(&steerSp, &steerInput, &steerOutput, -50.0, 50.0, KP_STEER, KI_STEER, KD_STEER, STEER_INTERVAL);
 
-    // // Print collumn catagories
-    // Pc.printf("Starting run\r\n");
-    // fprintf(ofp, "Point#, nearest waypoint, next waypoint, ");
-    // fprintf(ofp, "time, lat, long, #sat, ");
-    // fprintf(ofp, "xAcc, yAcc, zAcc, heading, ");
-    // fprintf(ofp, "lEncoder, rEncoder, lMotor, rMotor\r\n");
+    // Print collumn catagories
+    fprintf(ofp, "Point#, timeElapsed, ");
+    fprintf(ofp, "gpsDate, gpsTime, lat, long, ");
+    fprintf(ofp, "xAcc, yAcc, zAcc, heading, pitch, roll, ");
+    fprintf(ofp, "lEncoder, rEncoder, lMotor, rMotor\r\n");
+
+    // Wait for button press
+    while (button)
+        ;
+    wait_ms(500);
+
+    Pc.printf("Starting run\r\n");
 
     // Start PID
     steerPID.start();
@@ -122,47 +127,53 @@ int main()
     steerTimer.start();
 
     //main loop, stops when distance is reached or estop is engaged
-	while(distance > 0) {
+	while(distance > 0 && button) {
 
         if(steerTimer.read() > STEER_INTERVAL){
             // Reset timer for next interval
+            tElapsed += steerTimer.read();
             steerTimer.reset();
 
-            //Read data from IMU
+            // Read data from IMU
             imu.getEulerAng(&euler);
             imu.getLinAccel(&linAccel);
+
+            // Read encoder counts
             lenc = EncoderL.getPulses();
             renc = EncoderR.getPulses();
             EncoderL.reset();
             EncoderR.reset();
 
-            // if (gpsCount > 1) {
-            //     //get gps data
-            //     lock = Gps.parseData();
-            //     gpsCount = 0;
-            // }
+            // Read GPS data
+            if (Gps.newNMEAreceived()) {
+                lock = Gps.parse(Gps.lastNMEA());
+                gpsCount = 0;
+            }
 
-            // if (saveCount > 19) {
-            //     ///////////////////////////Record data and decisions to file
-            //     //record map relevent data (not currently used)   
-            //     fprintf(ofp, "%d, %d, %d, ", pCount, 0, 0); 
-            //     //record radio values
-            //     fprintf(ofp, "%f, %f, %f, %f, ", throtle, leftright, estop, mode);
-            //     //record gps data if available
-            //     if (lock) {
-            //         fprintf(ofp, "%f, %f, %f, %d, ", Gps.time, Gps.latitude,Gps.longitude, Gps.satellites);
-            //     } else {
-            //         fprintf(ofp, "NL, NL, NL, NL, ");
-            //     }
-            //     //record data from IMU
-            //     fprintf(ofp, "%f, %f, %f, ", linAccel.x, linAccel.y, linAccel.z);
-            //     fprintf(ofp, "%f, ", euler.heading);
-            //     //record encoder variables
-            //     fprintf(ofp, "%d, %d, ", lenc, renc);
-            //     //record motor variables
-            //     fprintf(ofp, "%d, %d\r\n", int(SPEED + output), int(SPEED - output)); 
-            //     saveCount = 0;
-            // }
+            if (saveCount >= 18) {
+                // Record data and decisions to file
+
+                // Record number of loops and elapsed time  
+                fprintf(ofp, "%d, %f, ", pCount, tElapsed); 
+
+                // Record gps data if available
+                if (lock) {
+                    fprintf(ofp, "%d/%d/%d, %d:%d:%d, %f, %f, ", Gps.month, Gps.day, Gps.year, Gps.hour, Gps.minute, Gps.seconds, Gps.latitude, Gps.longitude);
+                } else {
+                    fprintf(ofp, "NL, NL, NL, NL, ");
+                }
+
+                // Record data from IMU
+                fprintf(ofp, "%f, %f, %f, ", linAccel.x, linAccel.y, linAccel.z);
+                fprintf(ofp, "%f, %f, %f, ", euler.heading, euler.pitch, euler.roll);
+
+                //record encoder variables
+                fprintf(ofp, "%d, %d, ", lenc, renc);
+
+                //record motor variables
+                fprintf(ofp, "%f, %f\r\n", motorLOutput, motorROutput); 
+                saveCount = 0;
+            }
 
             // Stop PID before writing to shared variables
             steerPID.stop();
@@ -188,14 +199,16 @@ int main()
             // Restarts PID timers
             steerPID.start();
 
+            // Set motor output
             MotorL.setOutput(int(motorLOutput));
             MotorR.setOutput(int(motorROutput));
+
             distance -= (lenc + renc)/2;
                 
             //Increment data point count    
-            // pCount++;
-            // gpsCount++;
-            // saveCount++;
+            pCount++;
+            gpsCount++;
+            saveCount++;
         }
 
     }
@@ -208,11 +221,11 @@ int main()
     steerTimer.stop();
     steerPID.stop();
 
-    // //Unmount the filesystem
-    // fprintf(ofp,"End of Program\r\n");
-    // fclose(ofp);
-    // sd.unmount();
-    // Pc.printf("SD card unmounted\r\n");
+    //Unmount the filesystem
+    fprintf(ofp,"End of Program\r\n");
+    fclose(ofp);
+    sd.unmount();
+    Pc.printf("SD card unmounted\r\n");
 
     Pc.printf("Program Terminated\r\n");
     while(1);
