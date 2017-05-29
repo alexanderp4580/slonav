@@ -18,15 +18,12 @@
 *
 */
 
-class MOTOR
-{
+class MOTOR{
 
 private:
     PwmOut _forward;
     PwmOut _backward;
     DigitalOut _enable;
-    Serial _ser;
-    bool _verbose;
     uint8_t _motorNum;
 
 public:
@@ -38,8 +35,7 @@ public:
     *
     */
 
-    MOTOR(uint8_t motorNum, PinName forward, PinName backward, PinName enable, 
-	  bool verbose = false, PinName tx = USBTX, PinName rx = USBRX);
+    MOTOR(uint8_t motorNum, PinName forward, PinName backward, PinName enable);
 
     //--------------------------------------------------------------------------
     /** TODO

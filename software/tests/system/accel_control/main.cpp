@@ -6,7 +6,7 @@
 **/
 
 #include "mbed.h"
-#include "pinout.h"
+#include "pinout_model.h"
 
 #include "SDFileSystem.h"
 

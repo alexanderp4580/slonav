@@ -1,213 +1,118 @@
-/**
- * @author Aaron Berk
- *
- * @section LICENSE
- *
- * Copyright (c) 2010 ARM Limited
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- * @section DESCRIPTION
- * 
- * A PID controller is a widely used feedback controller commonly found in
- * industry.
- *
- * This library is a port of Brett Beauregard's Arduino PID library:
- *
- *  http://www.arduino.cc/playground/Code/PIDLibrary
- *
- * The wikipedia article on PID controllers is a good place to start on
- * understanding how they work:
- *
- *  http://en.wikipedia.org/wiki/PID_controller
- *
- * For a clear and elegant explanation of how to implement and tune a
- * controller, the controlguru website by Douglas J. Cooper (who also happened
- * to be Brett's controls professor) is an excellent reference:
- *
- *  http://www.controlguru.com/
- */
-
 #ifndef PID_H
 #define PID_H
-
-/**
- * Includes
- */
 #include "mbed.h"
+#include <algorithm>
 
-/**
- * Defines
- */
-#define MANUAL_MODE 0
-#define AUTO_MODE   1
-
-/**
- * Proportional-integral-derivative controller.
- */
-class PID {
-
-public:
-
-    /**
-     * Constructor.
-     *
-     * Sets default limits [0-3.3V], calculates tuning parameters, and sets
-     * manual mode with no bias.
-     *
-     * @param Kc - Tuning parameter
-     * @param tauI - Tuning parameter
-     * @param tauD - Tuning parameter
-     * @param interval PID calculation performed every interval seconds.
-     */
-    PID(float Kc, float tauI, float tauD, float interval);
-
-    /**
-     * Scale from inputs to 0-100%.
-     *
-     * @param InMin The real world value corresponding to 0%.
-     * @param InMax The real world value corresponding to 100%.
-     */
-    void setInputLimits(float inMin , float inMax);
-
-    /**
-     * Scale from outputs to 0-100%.
-     *
-     * @param outMin The real world value corresponding to 0%.
-     * @param outMax The real world value corresponding to 100%.
-     */
-    void setOutputLimits(float outMin, float outMax);
-
-    /**
-     * Calculate PID constants.
-     *
-     * Allows parameters to be changed on the fly without ruining calculations.
-     *
-     * @param Kc - Tuning parameter
-     * @param tauI - Tuning parameter
-     * @param tauD - Tuning parameter
-     */
-    void setTunings(float Kc, float tauI, float tauD);
-
-    /**
-     * Reinitializes controller internals. Automatically
-     * called on a manual to auto transition.
-     */
-    void reset(void);
+/*
+    Bryce Williams 11/19/2015
     
-    /**
-     * Set PID to manual or auto mode.
-     *
-     * @param mode        0 -> Manual
-     *             Non-zero -> Auto
-     */
-    void setMode(int mode);
+    PID Controller Class based on Brett Beauregard's Arduino PID Library
+    and PID blog post. 
     
-    /**
-     * Set how fast the PID loop is run.
-     *
-     * @param interval PID calculation peformed every interval seconds.
-     */
-    void setInterval(float interval);
+    Brett Beauregard's blog post explains the PID code implementation very well
+    and discusses why the actual equation is a bit different than the classical 
+    equation, i.e. he explains and implements how to overcome windup, dervative
+    kick, etc.  This class uses the same implementation, but adds interrupt 
+    driven computation. 
     
-    /**
-     * Set the set point.
-     *
-     * @param sp The set point as a real world value.
-     */
-    void setSetPoint(float sp);
-    
-    /**
-     * Set the process value.
-     *
-     * @param pv The process value as a real world value.
-     */
-    void setProcessValue(float pv);
-    
-    /**
-     * Set the bias.
-     *
-     * @param bias The bias for the controller output.
-     */
-    void setBias(float bias);
+    Reference Links:
+    1. Arduion Library:
+        (http://playground.arduino.cc/Code/PIDLibrary)
+    2. Brett Beauregard's PID Blog:
+        (http://brettbeauregard.com/blog/2011/04/improving-the-beginners-
+         pid-introduction/)
+*/
 
-    /**
-     * PID calculation.
-     *
-     * @return The controller output as a float between outMin and outMax.
-     */
-    float compute(void);
-
-    //Getters.
-    float getInMin();
-    float getInMax();
-    float getOutMin();
-    float getOutMax();
-    float getInterval();
-    float getPParam();
-    float getIParam();
-    float getDParam();
-
-private:
-
-    bool usingFeedForward;
-    bool inAuto;
-
-    //Actual tuning parameters used in PID calculation.
-    float Kc_;
-    float tauR_;
-    float tauD_;
-    
-    //Raw tuning parameters.
-    float pParam_;
-    float iParam_;
-    float dParam_;
-    
-    //The point we want to reach.
-    float setPoint_;         
-    //The thing we measure.
-    float processVariable_;  
-    float prevProcessVariable_;
-    //The output that affects the process variable.
-    float controllerOutput_; 
-    float prevControllerOutput_;
-
-    //We work in % for calculations so these will scale from
-    //real world values to 0-100% and back again.
-    float inMin_;
-    float inMax_;
-    float inSpan_;
-    float outMin_;
-    float outMax_;
-    float outSpan_;
-
-    //The accumulated error, i.e. integral.
-    float accError_;
-    //The controller output bias.
-    float bias_;
-
-    //The interval between samples.
-    float tSample_;          
-
-    //Controller output as a real world value.
-    volatile float realOutput_;
-
+class PID{
+    public:
+        /*
+            Constructor for PID objects. 
+            
+            Note: PID objects use given pointers, ie setpoint, 
+            feedback, output inside interrupts. When reading/ modifying
+            these vars make sure we don't have possible read/write 
+            conflicts if the interrupt fires. Either ensure reads/writes
+            are atomic operations, or call the stop() method perform the 
+            read/write and then call the start() method.
+            
+            @param setpoint   The setpoint
+            @param feedback   Pointer to feedback/sensor data var  
+            @param output     Pointer to the output var
+            @param output_lower    The lower bound of the output value
+            @param output_upper    The upper bount of the output value
+            @param kp   The Proportional Gain value
+            @param ki   The Integral Gain value
+            @param kd   The Derivative Gain value 
+            @param Ts   The sample period at which the PID algorithm will
+                        generate an interrupt and run. 
+        */
+        PID(float* setpoint, float* feedback, float* output,
+            float output_lower, float output_upper,
+            float  kp, float ki,  float kd, float Ts);
+        /*
+            Starts PID Controller; Attaches sample() as callback to Ticker 
+            sample_timer and starts the interrupt
+        */
+        void start();
+        /*
+            Stops PID Contoller; detaches callback from Ticker sample_timer.
+            Allows manual setting of output and read/write of shared vars, 
+            DON'T FORGET TO CALL stop() before read/write of shared vars!
+            Then after call start()!!!
+        */
+        void stop();
+        /*
+            Increments/ decrements Gain values and Sample time 
+            by the given value. Gives a simple method to 
+            programatically step through different values; just put in a 
+            loop and go
+            @param delta_"name" The value that will be added to its currently set value         
+        */
+//        void adjust_parameters(float delta_kp, float delta_ki, float delta_kd, float delta Ts);
+        /*
+            Overwrite Gain and Sample Time parameters with new 
+            values
+            Note: sample_timer interrupt is disabled during update
+                  to avoid synch issues.
+            
+        */
+        void set_parameters(float kp, float ki, float kd, float Ts);
+        
+        float getKp();
+        float getKi();
+        float getKd();
+        float getTs();
+        
+        /*
+            returns current error
+        */
+        float getError();
+   
+    private:
+        float _kp, _ki, _kd;            // PID Gain values
+        float _Ts;                      // Sample time is seconds
+        float* _setpoint;               // Pointer to setpoint value
+        float* _feedback;               // Pointer to sensor feedback value (sensor input)
+        float* _output;                 // Pointer to control output value
+        float  _output_lower;            // Ouput Lower Limit
+        float  _output_upper;            // Output Upper Limit
+        
+        float i_accumulator;            // Integral Term accumulator
+        float last_feedback;            // Previous feedback value
+        float error;                    // Feedback error term
+        Ticker sample_timer;            // Generates the sample time interrupt and calls sample()
+        /* 
+            sample() performs next sample calculationand updates command value
+        */
+        void sample();
+        /*
+            Clips value to lower/ uppper
+            @param value    The value to clip
+            @param lower    The mininum allowable value
+            @param upper    The maximum allowable value
+            @return         The resulting clipped value
+        */
+        float clip(float value, float lower, float upper);
 };
 
-#endif /* PID_H */
+#endif

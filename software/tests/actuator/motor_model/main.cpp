@@ -14,18 +14,18 @@
 //------------------------------------------------------------------------------
 
 // Pin definitions for X-NUCLEO-IMH04A1 board
-#define IN1A PB_4
-#define IN2A PB_5
-#define IN1B PA_1
-#define IN2B PA_0
-#define ENA  PA_10
-#define ENB  PC_1
+// #define IN1A PB_4
+// #define IN2A PB_5
+// #define IN1B PA_1
+// #define IN2B PA_0
+// #define ENA  PA_10
+// #define ENB  PC_1
 
 // Pin definitions for encoders
-#define CHA1 PA_8
-#define CHB1 PB_10
-#define CHA2 PA_7
-#define CHB2 PB_6
+// #define CHA1 PA_8
+// #define CHB1 PB_10
+// #define CHA2 PA_7
+// #define CHB2 PB_6
 
 //------------------------------------------------------------------------------
 
