@@ -164,7 +164,7 @@ int main()
                 }
 
                 // Record data from IMU
-                fprintf(ofp, "%f, %f, %f, ", linAccel.x, linAccel.y, linAccel.z);
+                fprintf(ofp, "%f, %f, %f, ", xAccel, linAccel.y, linAccel.z);
                 fprintf(ofp, "%f, %f, %f, ", euler.heading, euler.pitch, euler.roll);
 
                 //record encoder variables

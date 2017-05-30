@@ -47,6 +47,7 @@ PROJECT := slonav
 
 OBJECTS += main.o
 OBJECTS += PID.o
+OBJECTS += Adafruit_GPS.o
 OBJECTS += ../../data/SDFileSystem/SDFileSystem.o
 OBJECTS += ../../data/SDFileSystem/SDCRC.o
 OBJECTS += ../../data/SDFileSystem/FATFileSystem/FATDirHandle.o
@@ -58,8 +59,6 @@ OBJECTS += ../../data/SDFileSystem/FATFileSystem/ChaN/ff.o
 OBJECTS += ../../sensor/imu/imu.o
 OBJECTS += ../../sensor/radio/PwmIn.o
 OBJECTS += ../../sensor/gps/GPS.o
-OBJECTS += ../../sensor/fusion/fusion.o
-OBJECTS += ../../sensor/fusion/TinyEKF/tiny_ekf.o
 OBJECTS += ../../actuator/motor_model/motor.o
 OBJECTS += ../../actuator/motor_model/QEI.o
 
