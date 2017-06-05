@@ -59,8 +59,6 @@ OBJECTS += ../../data/SDFileSystem/FATFileSystem/ChaN/ff.o
 OBJECTS += ../../sensor/imu/imu.o
 OBJECTS += ../../sensor/radio/PwmIn.o
 OBJECTS += ../../sensor/gps/GPS.o
-OBJECTS += ../../sensor/fusion/fusion.o
-OBJECTS += ../../sensor/fusion/TinyEKF/tiny_ekf.o
 OBJECTS += ../../actuator/motor_model/motor.o
 OBJECTS += ../../actuator/motor_model/QEI.o
 

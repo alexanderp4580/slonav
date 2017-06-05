@@ -20,7 +20,7 @@
 #include "brake.h"
 
 // Main loop period
-#define INTERVAL 0.025
+#define INTERVAL 0.009
 // #define ENC_PPR 2048
 // #define GEAR_RATIO 0.244444
 // #define WHEEL_SIZE 0.833333
@@ -117,8 +117,8 @@ int modeRC(float throtle, float lrat, float brake, float *mr, float *ml, float *
         brake *= -1;
     }
 
-	*ml = (throtle) / 100;
-	*mr = (throtle) / 100;
+	*ml = ((1 - lrat)* throtle) / 100;
+	*mr = (lrat * throtle) / 100;
     *bA = brake;
 
     if (*ml < 0.01)
@@ -290,11 +290,12 @@ int main()
 
             ////////////////////////////Gather Data
             //get radio values
-            throtle = Throt.pulsewidth();
-            mode = Mode.pulsewidth();
-            leftright = Lr.pulsewidth();
-            brake = Brake.pulsewidth();
+            throtle += Throt.pulsewidth();
+            leftright += Lr.pulsewidth();
+            brake += Brake.pulsewidth();
+
             estop = E_Stop.pulsewidth();
+            mode = Mode.pulsewidth();
             // Pc.printf("E-Stop Value = %f\r\n", estop);
             //Read data from IMU
             // imu.getEulerAng(&euler);
@@ -306,7 +307,15 @@ int main()
             // EncoderL.reset();
             // EncoderR.reset();
 
-            modeRC(throtle, leftright, brake, &mr, &ml, &bA);
+            if (setCount >= 3){
+                throtle /= 3;
+                leftright /= 3;
+                brake /= 3;
+                modeRC(throtle, leftright, brake, &mr, &ml, &bA);
+                throtle = Throt.pulsewidth();
+                leftright = Lr.pulsewidth();
+                brake = Brake.pulsewidth();
+            }
 
             // if (saveCount > 19) {
             //     ///////////////////////////Record data and decisions to file

@@ -15,7 +15,7 @@
 #include "QEI.h"
 #include "PID.h"
 
-#define KP_STEER 3.0
+#define KP_STEER 5.0 // Tested with KP = 5.0
 #define KI_STEER 0.0
 #define KD_STEER 0.0
 #define SPEED 30.0
@@ -164,7 +164,7 @@ int main()
                 }
 
                 // Record data from IMU
-                fprintf(ofp, "%f, %f, %f, ", xAccel, linAccel.y, linAccel.z);
+                fprintf(ofp, "%f, %f, %f, ", linAccel.x, linAccel.y, linAccel.z);
                 fprintf(ofp, "%f, %f, %f, ", euler.heading, euler.pitch, euler.roll);
 
                 //record encoder variables

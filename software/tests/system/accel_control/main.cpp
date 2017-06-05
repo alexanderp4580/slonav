@@ -15,8 +15,8 @@
 #include "PwmIn.h"
 #include "PID.h"
 
-#define KP_ACCEL 0.1
-#define KI_ACCEL 1.0
+#define KP_ACCEL 2.0
+#define KI_ACCEL 0.0
 #define KD_ACCEL 0.0
 #define ACCEL_INTERVAL 0.028
 #define FILTER_INTERVAL 0.004
@@ -201,14 +201,11 @@ int main()
             // Restarts PID timers
             accelPID.start();
 
-            xAccel = 0.0;
-            accelRead = 0;
-
             // Set motor output
             MotorL.setOutput(int(motorLOutput));
             MotorR.setOutput(int(motorROutput));
 
-            if (saveCount >= 18) {
+            if (saveCount >= 10) {
                 // Record data and decisions to file
 
                 // Record number of loops and elapsed time  
@@ -222,7 +219,7 @@ int main()
                 }
 
                 // Record data from IMU
-                fprintf(ofp, "%f, %f, %f, ", linAccel.x, linAccel.y, linAccel.z);
+                fprintf(ofp, "%f, %f, %f, ", xAccel, linAccel.y, linAccel.z);
                 fprintf(ofp, "%f, %f, %f, ", euler.heading, euler.pitch, euler.roll);
 
                 //record encoder variables
@@ -232,6 +229,9 @@ int main()
                 fprintf(ofp, "%f, %f\r\n", motorLOutput, motorROutput); 
                 saveCount = 0;
             }
+
+            xAccel = 0.0;
+            accelRead = 0;
                 
             //Increment data point count    
             pCount++;
